@@ -88,7 +88,7 @@ public class VersionOneStory extends VersionOneEntity {
 		case "In Progress":
 			return TaskStatus.IN_PROGRESS;
 		case "Done":
-			return TaskStatus.READY;
+			return TaskStatus.COMPLETED;
 		case "Accepted":
 			return TaskStatus.COMPLETED;
 		default:

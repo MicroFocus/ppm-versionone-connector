@@ -22,7 +22,7 @@ public class VersionOneIntegrationConnector implements IntegrationConnector {
 
 	@Override
 	public String getTargetApplication() {
-		return "VERSIONONE";
+		return "VersionOne";
 	}
 
 	@Override

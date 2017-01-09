@@ -138,7 +138,7 @@ public class VersionOneTimebox extends VersionOneEntity {
 		case "CLSD":
 			return TaskStatus.COMPLETED;
 		case "FUTR":
-			return TaskStatus.IN_PLANNING;
+			return TaskStatus.READY;
 		case "ACTV":
 			return TaskStatus.ACTIVE;
 		default:
