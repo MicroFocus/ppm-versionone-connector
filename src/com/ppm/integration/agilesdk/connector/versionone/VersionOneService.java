@@ -80,13 +80,13 @@ public class VersionOneService {
 		return iterationz;
 	}
 
-	public Map<String, Map<String, Long>> getTimeSheet(String startDate, String endDate, String scopeId) {
+	public Map<String, Map<String, Double>> getTimeSheet(String startDate, String endDate, String scopeId) {
 		List<VersionOneActualForTimesheet> list = getActuals(startDate, endDate, scopeId);
-		Map<String, Map<String, Long>> map = new HashMap<>();
+		Map<String, Map<String, Double>> map = new HashMap<>();
 		for (VersionOneActualForTimesheet vaft : list) {
 			String parentName = vaft.getParentName();
 			if (map.containsKey(parentName)) {
-				Map<String, Long> dateEffort = map.get(parentName);
+				Map<String, Double> dateEffort = map.get(parentName);
 				String date = vaft.getDate();
 				if (dateEffort.containsKey(date)) {
 					dateEffort.put(date, dateEffort.get(date) + vaft.getValue());
@@ -96,7 +96,7 @@ public class VersionOneService {
 
 				}
 			} else {
-				Map<String, Long> dateEffort = new HashMap<>();
+				Map<String, Double> dateEffort = new HashMap<>();
 				dateEffort.put(vaft.getDate(), vaft.getValue());
 				map.put(vaft.getParentName(), dateEffort);
 			}
@@ -122,7 +122,7 @@ public class VersionOneService {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject actual = jsonArray.getJSONObject(i).getJSONObject("Attributes");
 				String parentName = actual.getJSONObject("Workitem.Parent.Name").getString("value");
-				Long value = actual.getJSONObject("Value").getLong("value");
+				Double value = actual.getJSONObject("Value").getDouble("value");
 				String date = actual.getJSONObject("Date").getString("value");
 				VersionOneActualForTimesheet vaft = new VersionOneActualForTimesheet(parentName, "", value, date);
 				list.add(vaft);

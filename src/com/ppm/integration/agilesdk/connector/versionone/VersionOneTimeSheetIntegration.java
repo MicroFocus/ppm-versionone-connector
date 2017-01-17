@@ -11,28 +11,28 @@ import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.hp.ppm.integration.ValueSet;
-import com.hp.ppm.integration.tm.IExternalWorkItem;
-import com.hp.ppm.integration.tm.TimeSheetIntegration;
-import com.hp.ppm.integration.tm.TimeSheetIntegrationContext;
-import com.hp.ppm.integration.ui.DynamicalDropdown;
-import com.hp.ppm.integration.ui.Field;
-import com.hp.ppm.integration.ui.LineBreaker;
-import com.hp.ppm.integration.ui.PasswordText;
-import com.hp.ppm.integration.ui.PlainText;
+import com.ppm.integration.agilesdk.ValueSet;
 import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneScope;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.IRestConfig;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.RestWrapper;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.VersionOneRestConfig;
+import com.ppm.integration.agilesdk.tm.ExternalWorkItem;
+import com.ppm.integration.agilesdk.tm.TimeSheetIntegration;
+import com.ppm.integration.agilesdk.tm.TimeSheetIntegrationContext;
+import com.ppm.integration.agilesdk.ui.DynamicDropdown;
+import com.ppm.integration.agilesdk.ui.Field;
+import com.ppm.integration.agilesdk.ui.LineBreaker;
+import com.ppm.integration.agilesdk.ui.PasswordText;
+import com.ppm.integration.agilesdk.ui.PlainText;
 
-public class VersionOneTimeSheetIntegration implements TimeSheetIntegration {
+public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
 	private VersionOneService service;
 
 	@Override
-	public List<IExternalWorkItem> getExternalWorkItems(TimeSheetIntegrationContext arg0, ValueSet values) {
+	public List<ExternalWorkItem> getExternalWorkItems(TimeSheetIntegrationContext arg0, ValueSet values) {
 
 		// Synchronized ?
-		final List<IExternalWorkItem> items = Collections.synchronizedList(new LinkedList<IExternalWorkItem>());
+		final List<ExternalWorkItem> items = Collections.synchronizedList(new LinkedList<ExternalWorkItem>());
 		XMLGregorianCalendar start = arg0.currentTimeSheet().getPeriodStartDate();
 		XMLGregorianCalendar end = arg0.currentTimeSheet().getPeriodEndDate();
 
@@ -40,15 +40,15 @@ public class VersionOneTimeSheetIntegration implements TimeSheetIntegration {
 				values.get(VersionOneConstants.KEY_USERNAME), values.get(VersionOneConstants.KEY_PASSWORD),
 				values.get(VersionOneConstants.KEY_BASE_URL));
 		String scopeId = values.get(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME);
-		Map<String, Map<String, Long>> map = service.getTimeSheet(start.toString().substring(0, 10),
+		Map<String, Map<String, Double>> map = service.getTimeSheet(start.toString().substring(0, 10),
 				end.toString().substring(0, 10), scopeId);
 
-		Set<Entry<String, Map<String, Long>>> entrySet = map.entrySet();
+		Set<Entry<String, Map<String, Double>>> entrySet = map.entrySet();
 
-		for (Entry<String, Map<String, Long>> entry : entrySet) {
-			long actualEffort = 0;
+		for (Entry<String, Map<String, Double>> entry : entrySet) {
+			double actualEffort = 0;
 
-			Map<String, Long> actualEfforts = entry.getValue();
+			Map<String, Double> actualEfforts = entry.getValue();
 			Set<String> keys = actualEfforts.keySet();
 			for (String key : keys) {
 				actualEffort += actualEfforts.get(key);
@@ -65,8 +65,8 @@ public class VersionOneTimeSheetIntegration implements TimeSheetIntegration {
 	@Override
 	public List<Field> getMappingConfigurationFields(ValueSet arg0) {
 		return Arrays.asList(new Field[] { new PlainText(VersionOneConstants.KEY_USERNAME, "USERNAME", "admin", true),
-				new PasswordText(VersionOneConstants.KEY_PASSWORD, "PASSWORD", "admin", true), new LineBreaker(),
-				new DynamicalDropdown(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME, "VersionOne_PROJECT", false) {
+				new PasswordText(VersionOneConstants.KEY_PASSWORD, "PASSWORD", "hpe1990", true), new LineBreaker(),
+				new DynamicDropdown(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME, "VERSIONONE_PROJECT", false) {
 
 					@Override
 					public List<String> getDependencies() {

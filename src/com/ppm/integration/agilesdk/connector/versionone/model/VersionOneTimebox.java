@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.hp.ppm.integration.pm.IExternalTask;
+import com.ppm.integration.agilesdk.pm.ExternalTask;
 
 public class VersionOneTimebox extends VersionOneEntity {
 	private String timeboxName;
@@ -105,13 +105,13 @@ public class VersionOneTimebox extends VersionOneEntity {
 	}
 
 	@Override
-	public Date getScheduleFinish() {
+	public Date getScheduledFinish() {
 
 		return toDate(this.endDate);
 	}
 
 	@Override
-	public Date getScheduleStart() {
+	public Date getScheduledStart() {
 
 		return toDate(this.beginDate);
 	}
@@ -123,8 +123,8 @@ public class VersionOneTimebox extends VersionOneEntity {
 	}
 
 	@Override
-	public List<IExternalTask> getChildren() {
-		List<IExternalTask> list = new ArrayList<>();
+	public List<ExternalTask> getChildren() {
+		List<ExternalTask> list = new ArrayList<>();
 		for (VersionOneStory s : stories) {
 			list.add(s);
 		}
@@ -142,7 +142,9 @@ public class VersionOneTimebox extends VersionOneEntity {
 		case "ACTV":
 			return TaskStatus.ACTIVE;
 		default:
-			return TaskStatus.UNKNOWN;
+			// return TaskStatus.UNKNOWN; the status unkonwn will cause an
+			// exception
+			return TaskStatus.ON_HOLD;
 		}
 	}
 }

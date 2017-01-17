@@ -3,31 +3,33 @@ package com.ppm.integration.agilesdk.connector.versionone;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hp.ppm.integration.FunctionIntegration;
-import com.hp.ppm.integration.IntegrationConnector;
-import com.hp.ppm.integration.IntegrationConnectorInstance;
-import com.hp.ppm.integration.ui.Field;
-import com.hp.ppm.integration.ui.PlainText;
+import com.ppm.integration.agilesdk.FunctionIntegration;
+import com.ppm.integration.agilesdk.IntegrationConnector;
+import com.ppm.integration.agilesdk.IntegrationConnectorInstance;
+import com.ppm.integration.agilesdk.ui.Field;
+import com.ppm.integration.agilesdk.ui.PlainText;
 
 /**
  * 
  * @author baijuy
  * 
- *         The connector provides the integration for ppm with VersionOne. The field
- *         InstanceName and BaseUrl are required and field Proxy is optional.
- *         Once the connector is saved, it can be used to integrate with
- *         workplan or timesheet.
+ *         The connector provides the integration for ppm with VersionOne. The
+ *         field InstanceName and BaseUrl are required and field Proxy is
+ *         optional. Once the connector is saved, it can be used to integrate
+ *         with workplan or timesheet.
  */
-public class VersionOneIntegrationConnector implements IntegrationConnector {
+public class VersionOneIntegrationConnector extends IntegrationConnector {
 
 	@Override
-	public String getTargetApplication() {
-		return "VersionOne";
+	public String getConnectorVersion() {
+		
+		return "2016 (16.3.5.270)";
 	}
 
 	@Override
-	public String getTargetApplicationVersion() {
-		return "2016 (16.3.5.270)";
+	public String getExternalApplicationName() {
+	
+		return "VersionOne";
 	}
 
 	@Override
@@ -52,11 +54,6 @@ public class VersionOneIntegrationConnector implements IntegrationConnector {
 	public List<FunctionIntegration> getIntegrations() {
 		return Arrays.asList(new FunctionIntegration[] { new VersionOneWorkPlanIntegration(),
 				new VersionOneTimeSheetIntegration() });
-	}
-
-	@Override
-	public IntegrationConnectorInstance getBuildinInstance() {
-		return null;
 	}
 
 }

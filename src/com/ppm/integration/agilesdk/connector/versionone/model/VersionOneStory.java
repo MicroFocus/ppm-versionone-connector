@@ -1,9 +1,6 @@
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
 import java.util.Date;
-import java.util.List;
-
-import com.hp.ppm.integration.pm.ITaskActual;
 
 public class VersionOneStory extends VersionOneEntity {
 	private String storyName;
@@ -57,13 +54,13 @@ public class VersionOneStory extends VersionOneEntity {
 	}
 
 	@Override
-	public Date getScheduleFinish() {
+	public Date getScheduledFinish() {
 
 		return toDate(this.endDate);
 	}
 
 	@Override
-	public Date getScheduleStart() {
+	public Date getScheduledStart() {
 
 		return toDate(this.beginDate);
 	}
@@ -74,14 +71,7 @@ public class VersionOneStory extends VersionOneEntity {
 		return getTaskStatus(this.statusName);
 	}
 
-	@Override
-	public List<ITaskActual> getActuals() {
-
-		return null;
-	}
-
 	private TaskStatus getTaskStatus(String status) {
-
 		switch (status) {
 		case "Future":
 			return TaskStatus.IN_PLANNING;
@@ -92,7 +82,8 @@ public class VersionOneStory extends VersionOneEntity {
 		case "Accepted":
 			return TaskStatus.COMPLETED;
 		default:
-			return TaskStatus.UNKNOWN;
+			// return TaskStatus.UNKNOWN; the statau unkonwn will case an exceptionn
+			return TaskStatus.ON_HOLD;
 		}
 	}
 }

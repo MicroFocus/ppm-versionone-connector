@@ -3,10 +3,10 @@ package com.ppm.integration.agilesdk.connector.versionone.model;
 public class VersionOneActualForTimesheet {
 	private String parentName;
 	private String actualName;
-	private Long value;
+	private Double value;
 	private String date;
 
-	public VersionOneActualForTimesheet(String parentName, String actualName, Long value, String date) {
+	public VersionOneActualForTimesheet(String parentName, String actualName, Double value, String date) {
 		this.parentName = parentName;
 		this.actualName = actualName;
 		this.value = value;
@@ -29,11 +29,11 @@ public class VersionOneActualForTimesheet {
 		this.actualName = actualName;
 	}
 
-	public Long getValue() {
+	public Double getValue() {
 		return value;
 	}
 
-	public void setValue(Long value) {
+	public void setValue(Double value) {
 		this.value = value;
 	}
 
