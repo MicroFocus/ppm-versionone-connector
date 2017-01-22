@@ -1,148 +1,145 @@
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
+import com.ppm.integration.agilesdk.pm.ExternalTask;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.hp.ppm.integration.pm.IExternalTask;
-
 public class VersionOneTimebox extends VersionOneEntity {
-	private String timeboxName;
-	private String beginDate;
-	private String endDate;
-	private String stateCode;
-	private List<VersionOneStory> stories;
+    private String timeboxName;
 
-	public VersionOneTimebox(String timeboxName, String beginDate, String endDate, String stateCode) {
+    private String beginDate;
 
-		this.timeboxName = timeboxName;
-		this.beginDate = beginDate;
-		this.endDate = endDate;
-		this.stateCode = stateCode;
-	}
+    private String endDate;
 
-	public String getTimeboxName() {
-		return timeboxName;
-	}
+    private String stateCode;
 
-	public void setTimeboxName(String timeboxName) {
-		this.timeboxName = timeboxName;
-	}
+    private List<VersionOneStory> stories;
 
-	public String getBeginDate() {
-		return beginDate;
-	}
+    public VersionOneTimebox(String timeboxName, String beginDate, String endDate, String stateCode) {
 
-	public void setBeginDate(String beginDate) {
-		this.beginDate = beginDate;
-	}
+        this.timeboxName = timeboxName;
+        this.beginDate = beginDate;
+        this.endDate = endDate;
+        this.stateCode = stateCode;
+    }
 
-	public String getEndDate() {
-		return endDate;
-	}
+    public String getTimeboxName() {
+        return timeboxName;
+    }
 
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
-	}
+    public void setTimeboxName(String timeboxName) {
+        this.timeboxName = timeboxName;
+    }
 
-	public String getStateCode() {
-		return stateCode;
-	}
+    public String getBeginDate() {
+        return beginDate;
+    }
 
-	public void setStateCode(String stateCode) {
-		this.stateCode = stateCode;
-	}
+    public void setBeginDate(String beginDate) {
+        this.beginDate = beginDate;
+    }
 
-	public List<VersionOneStory> getStories() {
-		return stories;
-	}
+    public String getEndDate() {
+        return endDate;
+    }
 
-	public void setStories(List<VersionOneStory> stories) {
-		this.stories = stories;
-	}
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((beginDate == null) ? 0 : beginDate.hashCode());
-		result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
-		result = prime * result + ((timeboxName == null) ? 0 : timeboxName.hashCode());
-		return result;
-	}
+    public String getStateCode() {
+        return stateCode;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		VersionOneTimebox other = (VersionOneTimebox) obj;
-		if (beginDate == null) {
-			if (other.beginDate != null)
-				return false;
-		} else if (!beginDate.equals(other.beginDate))
-			return false;
-		if (endDate == null) {
-			if (other.endDate != null)
-				return false;
-		} else if (!endDate.equals(other.endDate))
-			return false;
-		if (timeboxName == null) {
-			if (other.timeboxName != null)
-				return false;
-		} else if (!timeboxName.equals(other.timeboxName))
-			return false;
-		return true;
-	}
+    public void setStateCode(String stateCode) {
+        this.stateCode = stateCode;
+    }
 
-	@Override
-	public String getName() {
+    public List<VersionOneStory> getStories() {
+        return stories;
+    }
 
-		return this.timeboxName;
-	}
+    public void setStories(List<VersionOneStory> stories) {
+        this.stories = stories;
+    }
 
-	@Override
-	public Date getScheduleFinish() {
+    @Override public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((beginDate == null) ? 0 : beginDate.hashCode());
+        result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
+        result = prime * result + ((timeboxName == null) ? 0 : timeboxName.hashCode());
+        return result;
+    }
 
-		return toDate(this.endDate);
-	}
+    @Override public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        VersionOneTimebox other = (VersionOneTimebox)obj;
+        if (beginDate == null) {
+            if (other.beginDate != null)
+                return false;
+        } else if (!beginDate.equals(other.beginDate))
+            return false;
+        if (endDate == null) {
+            if (other.endDate != null)
+                return false;
+        } else if (!endDate.equals(other.endDate))
+            return false;
+        if (timeboxName == null) {
+            if (other.timeboxName != null)
+                return false;
+        } else if (!timeboxName.equals(other.timeboxName))
+            return false;
+        return true;
+    }
 
-	@Override
-	public Date getScheduleStart() {
+    @Override public String getName() {
 
-		return toDate(this.beginDate);
-	}
+        return this.timeboxName;
+    }
 
-	@Override
-	public TaskStatus getStatus() {
+    @Override public Date getScheduledFinish() {
 
-		return getTaskStatus(this.stateCode);
-	}
+        return toDate(this.endDate);
+    }
 
-	@Override
-	public List<IExternalTask> getChildren() {
-		List<IExternalTask> list = new ArrayList<>();
-		for (VersionOneStory s : stories) {
-			list.add(s);
-		}
+    @Override public Date getScheduledStart() {
 
-		return list;
-	}
+        return toDate(this.beginDate);
+    }
 
-	private TaskStatus getTaskStatus(String status) {
+    @Override public TaskStatus getStatus() {
 
-		switch (status) {
-		case "CLSD":
-			return TaskStatus.COMPLETED;
-		case "FUTR":
-			return TaskStatus.READY;
-		case "ACTV":
-			return TaskStatus.ACTIVE;
-		default:
-			return TaskStatus.UNKNOWN;
-		}
-	}
+        return getTaskStatus(this.stateCode);
+    }
+
+    @Override public List<ExternalTask> getChildren() {
+        List<ExternalTask> list = new ArrayList<>();
+        for (VersionOneStory s : stories) {
+            list.add(s);
+        }
+
+        return list;
+    }
+
+    private TaskStatus getTaskStatus(String status) {
+
+        switch (status) {
+            case "CLSD":
+                return TaskStatus.COMPLETED;
+            case "FUTR":
+                return TaskStatus.READY;
+            case "ACTV":
+                return TaskStatus.ACTIVE;
+            default:
+                return TaskStatus.UNKNOWN;
+        }
+    }
 }
