@@ -1,28 +1,29 @@
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
 public class VersionOneScope {
-	private String scopeName;
-	private String scopeId;
+    private String scopeName;
 
-	public VersionOneScope(String scopeName, String scopeId) {
-		this.scopeName = scopeName;
-		this.scopeId = scopeId;
-	}
+    private String scopeId;
 
-	public String getScopeName() {
-		return scopeName;
-	}
+    public VersionOneScope(String scopeName, String scopeId) {
+        this.scopeName = scopeName;
+        this.scopeId = scopeId;
+    }
 
-	public void setScopeName(String scopeName) {
-		this.scopeName = scopeName;
-	}
+    public String getScopeName() {
+        return scopeName;
+    }
 
-	public String getScopeId() {
-		return scopeId;
-	}
+    public void setScopeName(String scopeName) {
+        this.scopeName = scopeName;
+    }
 
-	public void setScopeId(String scopeId) {
-		this.scopeId = scopeId;
-	}
+    public String getScopeId() {
+        return scopeId;
+    }
+
+    public void setScopeId(String scopeId) {
+        this.scopeId = scopeId;
+    }
 
 }

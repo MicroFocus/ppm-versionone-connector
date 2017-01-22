@@ -1,98 +1,88 @@
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
 import java.util.Date;
-import java.util.List;
-
-import com.hp.ppm.integration.pm.ITaskActual;
 
 public class VersionOneStory extends VersionOneEntity {
-	private String storyName;
-	private String beginDate;
-	private String endDate;
-	private String statusName;
+    private String storyName;
 
-	public VersionOneStory(String storyName, String beginDate, String endDate, String statusName) {
-		this.storyName = storyName;
-		this.beginDate = beginDate;
-		this.endDate = endDate;
-		this.statusName = statusName;
-	}
+    private String beginDate;
 
-	public String getStoryName() {
-		return storyName;
-	}
+    private String endDate;
 
-	public void setStoryName(String storyName) {
-		this.storyName = storyName;
-	}
+    private String statusName;
 
-	public String getBeginDate() {
-		return beginDate;
-	}
+    public VersionOneStory(String storyName, String beginDate, String endDate, String statusName) {
+        this.storyName = storyName;
+        this.beginDate = beginDate;
+        this.endDate = endDate;
+        this.statusName = statusName;
+    }
 
-	public void setBeginDate(String beginDate) {
-		this.beginDate = beginDate;
-	}
+    public String getStoryName() {
+        return storyName;
+    }
 
-	public String getEndDate() {
-		return endDate;
-	}
+    public void setStoryName(String storyName) {
+        this.storyName = storyName;
+    }
 
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
-	}
+    public String getBeginDate() {
+        return beginDate;
+    }
 
-	public String getStatusName() {
-		return statusName;
-	}
+    public void setBeginDate(String beginDate) {
+        this.beginDate = beginDate;
+    }
 
-	public void setStatusName(String statusName) {
-		this.statusName = statusName;
-	}
+    public String getEndDate() {
+        return endDate;
+    }
 
-	@Override
-	public String getName() {
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
 
-		return this.storyName;
-	}
+    public String getStatusName() {
+        return statusName;
+    }
 
-	@Override
-	public Date getScheduleFinish() {
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
 
-		return toDate(this.endDate);
-	}
+    @Override public String getName() {
 
-	@Override
-	public Date getScheduleStart() {
+        return this.storyName;
+    }
 
-		return toDate(this.beginDate);
-	}
+    @Override public Date getScheduledFinish() {
 
-	@Override
-	public TaskStatus getStatus() {
+        return toDate(this.endDate);
+    }
 
-		return getTaskStatus(this.statusName);
-	}
+    @Override public Date getScheduledStart() {
 
-	@Override
-	public List<ITaskActual> getActuals() {
+        return toDate(this.beginDate);
+    }
 
-		return null;
-	}
+    @Override public TaskStatus getStatus() {
 
-	private TaskStatus getTaskStatus(String status) {
+        return getTaskStatus(this.statusName);
+    }
 
-		switch (status) {
-		case "Future":
-			return TaskStatus.IN_PLANNING;
-		case "In Progress":
-			return TaskStatus.IN_PROGRESS;
-		case "Done":
-			return TaskStatus.COMPLETED;
-		case "Accepted":
-			return TaskStatus.COMPLETED;
-		default:
-			return TaskStatus.UNKNOWN;
-		}
-	}
+    private TaskStatus getTaskStatus(String status) {
+
+        switch (status) {
+            case "Future":
+                return TaskStatus.IN_PLANNING;
+            case "In Progress":
+                return TaskStatus.IN_PROGRESS;
+            case "Done":
+                return TaskStatus.COMPLETED;
+            case "Accepted":
+                return TaskStatus.COMPLETED;
+            default:
+                return TaskStatus.UNKNOWN;
+        }
+    }
 }
