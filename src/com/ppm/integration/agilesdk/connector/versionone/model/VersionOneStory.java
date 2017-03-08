@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
@@ -7,6 +8,11 @@ import java.util.List;
 import com.ppm.integration.agilesdk.pm.ExternalTaskActuals;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+=======
+package com.ppm.integration.agilesdk.connector.versionone.model;
+
+import java.util.Date;
+>>>>>>> origin/master
 
 public class VersionOneStory extends VersionOneEntity {
     private String storyName;
@@ -17,6 +23,7 @@ public class VersionOneStory extends VersionOneEntity {
 
     private String statusName;
 
+<<<<<<< HEAD
     private String createDate;
 
     private String changeDate;
@@ -29,15 +36,21 @@ public class VersionOneStory extends VersionOneEntity {
 
     public VersionOneStory(String storyName, String beginDate, String endDate, String statusName, String createDate,
             String changeDate, String detailEstimateHrs, String doneHrs, String toDoHrs) {
+=======
+    public VersionOneStory(String storyName, String beginDate, String endDate, String statusName) {
+>>>>>>> origin/master
         this.storyName = storyName;
         this.beginDate = beginDate;
         this.endDate = endDate;
         this.statusName = statusName;
+<<<<<<< HEAD
         this.createDate = createDate;
         this.changeDate = changeDate;
         this.detailEstimateHrs = detailEstimateHrs;
         this.doneHrs = doneHrs;
         this.toDoHrs = toDoHrs;
+=======
+>>>>>>> origin/master
     }
 
     public String getStoryName() {
@@ -72,6 +85,7 @@ public class VersionOneStory extends VersionOneEntity {
         this.statusName = statusName;
     }
 
+<<<<<<< HEAD
     public String getCreateDate() {
         return createDate;
     }
@@ -119,10 +133,19 @@ public class VersionOneStory extends VersionOneEntity {
 
     @Override
     public Date getScheduledFinish() {
+=======
+    @Override public String getName() {
+
+        return this.storyName;
+    }
+
+    @Override public Date getScheduledFinish() {
+>>>>>>> origin/master
 
         return toDate(this.endDate);
     }
 
+<<<<<<< HEAD
     @Override
     public Date getScheduledStart() {
         if (beginDate.compareTo(createDate) == 1) {
@@ -179,6 +202,14 @@ public class VersionOneStory extends VersionOneEntity {
 
     @Override
     public TaskStatus getStatus() {
+=======
+    @Override public Date getScheduledStart() {
+
+        return toDate(this.beginDate);
+    }
+
+    @Override public TaskStatus getStatus() {
+>>>>>>> origin/master
 
         return getTaskStatus(this.statusName);
     }
