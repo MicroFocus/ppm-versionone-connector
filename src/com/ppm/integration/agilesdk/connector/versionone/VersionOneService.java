@@ -3,6 +3,7 @@ package com.ppm.integration.agilesdk.connector.versionone;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -151,7 +152,7 @@ public class VersionOneService {
     }
 
     private Map<VersionOneTimebox, List<VersionOneStory>> getStoriesWithTimebox(String scopeId) {
-        Map<VersionOneTimebox, List<VersionOneStory>> iterations = new HashMap<>();
+        Map<VersionOneTimebox, List<VersionOneStory>> iterations = new LinkedHashMap<>();
         ClientResponse response = wrapper.sendGet(baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + scopeId);
 
         String jsonStr = response.getEntity(String.class);
