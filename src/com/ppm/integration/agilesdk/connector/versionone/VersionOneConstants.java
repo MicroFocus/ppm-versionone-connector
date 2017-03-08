@@ -1,3 +1,4 @@
+
 package com.ppm.integration.agilesdk.connector.versionone;
 
 public class VersionOneConstants {
@@ -28,7 +29,7 @@ public class VersionOneConstants {
             API_VERSION_API_DATA_ROOT + "Scope?sel=Name&where=AssetState='64'&Accept=application/json";
 
     public static final String STORIES_WITH_TIMEBOX_SUFFIX = API_VERSION_API_DATA_ROOT
-            + "Story?Accept=application/json&sel=Name,Status.Name,Timebox.Name,Timebox.State.Code,Timebox.BeginDate,Timebox.EndDate&where=Scope=$myScope&with=$myScope=";
+            + "Story?Accept=application/json&sel=Name,Status.Name,Timebox.Name,Timebox.State.Code,Timebox.BeginDate,Timebox.EndDate,CreateDate,ChangeDate,Children.Actuals.Value.@Sum,Children.ToDo.@Sum,Children.DetailEstimate.@Sum&where=Scope=$myScope&with=$myScope=";
 
     public static final String ACTUALS_SUFFIX =
             API_VERSION_API_DATA_ROOT + "Actual?Accept=application/json&sel=Workitem.Parent,Date,Value";

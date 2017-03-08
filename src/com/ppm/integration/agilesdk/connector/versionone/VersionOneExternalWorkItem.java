@@ -1,14 +1,16 @@
+
 package com.ppm.integration.agilesdk.connector.versionone;
 
-import com.ppm.integration.agilesdk.tm.ExternalWorkItem;
-import com.ppm.integration.agilesdk.tm.ExternalWorkItemEffortBreakdown;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import com.ppm.integration.agilesdk.tm.ExternalWorkItem;
+import com.ppm.integration.agilesdk.tm.ExternalWorkItemEffortBreakdown;
 
 public class VersionOneExternalWorkItem extends ExternalWorkItem {
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -26,8 +28,7 @@ public class VersionOneExternalWorkItem extends ExternalWorkItem {
     private XMLGregorianCalendar dateTo;
 
     public VersionOneExternalWorkItem(String name, long totalEffort, String errorMessage, XMLGregorianCalendar dateFrom,
-            XMLGregorianCalendar dateTo, Map<String, Long> timeSpent)
-    {
+            XMLGregorianCalendar dateTo, Map<String, Long> timeSpent) {
         this.name = name;
         this.totalEffort = totalEffort;
         this.errorMessage = errorMessage;
@@ -36,15 +37,18 @@ public class VersionOneExternalWorkItem extends ExternalWorkItem {
         this.timeSpent = timeSpent;
     }
 
-    @Override public String getName() {
+    @Override
+    public String getName() {
         return this.name;
     }
 
-    @Override public Double getTotalEffort() {
+    @Override
+    public Double getTotalEffort() {
         return (double)totalEffort;
     }
 
-    @Override  public ExternalWorkItemEffortBreakdown getEffortBreakDown() {
+    @Override
+    public ExternalWorkItemEffortBreakdown getEffortBreakDown() {
 
         ExternalWorkItemEffortBreakdown effortBreakdown = new ExternalWorkItemEffortBreakdown();
 
@@ -65,7 +69,8 @@ public class VersionOneExternalWorkItem extends ExternalWorkItem {
         return effortBreakdown;
     }
 
-    @Override public String getErrorMessage() {
+    @Override
+    public String getErrorMessage() {
         return errorMessage;
     }
 

@@ -1,11 +1,13 @@
+
 package com.ppm.integration.agilesdk.connector.versionone.rest.util;
 
-import com.ppm.integration.agilesdk.connector.versionone.rest.util.exception.RestRequestException;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 
-import javax.ws.rs.core.MediaType;
+import com.ppm.integration.agilesdk.connector.versionone.rest.util.exception.RestRequestException;
 
 public class RestWrapper {
     private RestClient restClient;
@@ -53,29 +55,24 @@ public class RestWrapper {
 
     public Resource getJIRAResource(IRestConfig config, String uri) {
         restClient = createRestClient(config);
-        Resource resource =
-                restClient.resource(uri).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", config.getBasicAuthorizaton());
+        Resource resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getBasicAuthorizaton());
         return resource;
     }
 
     public Resource getJIRAResource(String uri) {
-        Resource resource =
-                restClient.resource(uri).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-                        .header("Authorization", config.getBasicAuthorizaton());
+        Resource resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getBasicAuthorizaton());
         return resource;
     }
 
     public ClientResponse sendGet(String uri) {
         Resource resource = this.getJIRAResource(uri);
         ClientResponse response = resource.get();
-
         int statusCode = response.getStatusCode();
-
         if (statusCode != 200) {
-            throw new RestRequestException(statusCode, response.getMessage());
+            throw new RestRequestException(statusCode + "", response.getMessage());
         }
-
         return response;
     }
 }
