@@ -1,3 +1,4 @@
+
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
 import com.ppm.integration.agilesdk.pm.ExternalTask;
@@ -65,7 +66,8 @@ public class VersionOneTimebox extends VersionOneEntity {
         this.stories = stories;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((beginDate == null) ? 0 : beginDate.hashCode());
@@ -74,7 +76,8 @@ public class VersionOneTimebox extends VersionOneEntity {
         return result;
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (obj == null)
@@ -100,27 +103,32 @@ public class VersionOneTimebox extends VersionOneEntity {
         return true;
     }
 
-    @Override public String getName() {
+    @Override
+    public String getName() {
 
         return this.timeboxName;
     }
 
-    @Override public Date getScheduledFinish() {
+    @Override
+    public Date getScheduledFinish() {
 
         return toDate(this.endDate);
     }
 
-    @Override public Date getScheduledStart() {
+    @Override
+    public Date getScheduledStart() {
 
         return toDate(this.beginDate);
     }
 
-    @Override public TaskStatus getStatus() {
+    @Override
+    public TaskStatus getStatus() {
 
         return getTaskStatus(this.stateCode);
     }
 
-    @Override public List<ExternalTask> getChildren() {
+    @Override
+    public List<ExternalTask> getChildren() {
         List<ExternalTask> list = new ArrayList<>();
         for (VersionOneStory s : stories) {
             list.add(s);

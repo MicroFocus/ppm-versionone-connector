@@ -1,3 +1,4 @@
+
 package com.ppm.integration.agilesdk.connector.versionone.rest.util.exception;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -7,8 +8,7 @@ import org.apache.wink.client.ClientRuntimeException;
 import com.ppm.integration.IntegrationException;
 import com.ppm.integration.agilesdk.connector.versionone.VersionOneIntegrationConnector;
 
-public class VersionOneConnectivityExceptionHandler implements
-		UncaughtExceptionHandler {
+public class VersionOneConnectivityExceptionHandler implements UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
