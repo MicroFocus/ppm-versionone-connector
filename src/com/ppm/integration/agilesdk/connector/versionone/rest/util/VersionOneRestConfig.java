@@ -1,3 +1,4 @@
+
 package com.ppm.integration.agilesdk.connector.versionone.rest.util;
 
 import org.apache.commons.codec.binary.Base64;
@@ -19,7 +20,8 @@ public class VersionOneRestConfig implements IRestConfig {
         return clientConfig;
     }
 
-    @Override public ClientConfig setProxy(String proxyHost, String proxyPort) {
+    @Override
+    public ClientConfig setProxy(String proxyHost, String proxyPort) {
 
         if (proxyHost != null && !proxyHost.isEmpty() && proxyPort != null && !proxyPort.isEmpty()) {
             clientConfig.proxyHost(proxyHost);
@@ -28,8 +30,10 @@ public class VersionOneRestConfig implements IRestConfig {
         return clientConfig;
     }
 
-    // some responses not expected when setting the authentication with this method
-    @Override public ClientConfig setBasicAuthorizatonWithBasicAuthHandler(String username, String password) {
+    // some responses not expected when setting the authentication with this
+    // method
+    @Override
+    public ClientConfig setBasicAuthorizatonWithBasicAuthHandler(String username, String password) {
 
         basicAuthHandler = basicAuthHandler == null ? new BasicAuthSecurityHandler() : basicAuthHandler;
         basicAuthHandler.setUserName(username);
@@ -39,12 +43,14 @@ public class VersionOneRestConfig implements IRestConfig {
     }
 
     // recommend this method to set the authentication for now
-    @Override public String getBasicAuthorizaton() {
+    @Override
+    public String getBasicAuthorizaton() {
 
         return basicAuthentication;
     }
 
-    @Override public void setBasicAuthorizaton(String username, String password) {
+    @Override
+    public void setBasicAuthorizaton(String username, String password) {
 
         String basicToken = new String(Base64.encodeBase64((username + ":" + password).getBytes()));
         basicAuthentication = RestConstants.BASIC_AUTHENTICATION_PREFIX + basicToken;
