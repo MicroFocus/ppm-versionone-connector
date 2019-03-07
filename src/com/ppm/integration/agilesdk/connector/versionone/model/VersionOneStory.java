@@ -119,7 +119,6 @@ public class VersionOneStory extends VersionOneEntity {
 
     @Override
     public Date getScheduledFinish() {
-
         return toDate(this.endDate);
     }
 
@@ -159,7 +158,10 @@ public class VersionOneStory extends VersionOneEntity {
 
             @Override
             public Double getEstimatedRemainingEffort() {
-                return super.getEstimatedRemainingEffort();
+                if ("null".equals(toDoHrs)) {
+                    return 0.0;
+                }
+                return Double.parseDouble(toDoHrs);
             }
 
             @Override

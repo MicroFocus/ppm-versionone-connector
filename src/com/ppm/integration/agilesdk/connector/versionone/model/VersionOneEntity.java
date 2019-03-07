@@ -1,18 +1,17 @@
 
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
-import static com.ppm.integration.agilesdk.connector.jira.JIRAConstants.NULL_VALUE;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants;
 import org.apache.log4j.Logger;
 
 import com.ppm.integration.agilesdk.pm.ExternalTask;
 
-public class VersionOneEntity extends ExternalTask {
+public class VersionOneEntity extends ExternalTask implements VersionOneConstants {
     private final Logger logger = Logger.getLogger(this.getClass());
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");

@@ -3,11 +3,11 @@ package com.ppm.integration.agilesdk.connector.versionone;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ppm.integration.agilesdk.provider.Providers;
 import org.apache.log4j.Logger;
 import org.apache.wink.client.ClientResponse;
 import org.json.JSONArray;
@@ -73,17 +73,22 @@ public class VersionOneService {
     }
 
     public List<VersionOneTimebox> getTimeboxes(String scopeId) {
-        Map<VersionOneTimebox, List<VersionOneStory>> iterations = getStoriesWithTimebox(scopeId);
-        List<VersionOneTimebox> iterationz = new ArrayList<>();
+        Map<VersionOneTimebox, List<VersionOneStory>> iterations = getStoriesPerTimebox(scopeId);
 
-        Set<VersionOneTimebox> set = iterations.keySet();
+        List<VersionOneTimebox> timeboxes = new ArrayList<>();
 
-        for (VersionOneTimebox vt : set) {
-            vt.setStories(iterations.get(vt));
-            iterationz.add(vt);
+        for (Map.Entry<VersionOneTimebox, List<VersionOneStory>> entry : iterations.entrySet()) {
+
+            VersionOneTimebox timebox = entry.getKey();
+            if (timebox == null) {
+                timebox = new VersionOneTimebox(null, Providers.getLocalizationProvider(VersionOneIntegrationConnector.class).getConnectorText("NO_ITERATION_DEFINED_TASK_NAME"), null, null, "FUTR");
+            }
+
+            timebox.setStories(entry.getValue());
+            timeboxes.add(timebox);
         }
 
-        return iterationz;
+        return timeboxes;
     }
 
     public Map<String, Map<String, Long>> getTimeSheet(String startDate, String endDate, String scopeId,
@@ -151,9 +156,9 @@ public class VersionOneService {
         return url.replaceAll(" ", "%20").replaceAll(">", "%3E").replaceAll("<", "%3C").replaceAll("@", "%40");
     }
 
-    private Map<VersionOneTimebox, List<VersionOneStory>> getStoriesWithTimebox(String scopeId) {
-        Map<VersionOneTimebox, List<VersionOneStory>> iterations = new LinkedHashMap<>();
-        ClientResponse response = wrapper.sendGet(baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + scopeId);
+    private Map<VersionOneTimebox, List<VersionOneStory>> getStoriesPerTimebox(String scopeId) {
+        Map<VersionOneTimebox, List<VersionOneStory>> storiesPerTimebox = new HashMap<>();
+        ClientResponse response = wrapper.sendGet(baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + "%22"+scopeId+"%22");
 
         String jsonStr = response.getEntity(String.class);
         try {
@@ -166,32 +171,43 @@ public class VersionOneService {
                 JSONObject attributes = asset.getJSONObject("Attributes");
                 String name = attributes.getJSONObject("Name").getString("value");
                 String statusName = attributes.getJSONObject("Status.Name").getString("value");
+
                 String beginDate = attributes.getJSONObject("Timebox.BeginDate").getString("value");
                 String endDate = attributes.getJSONObject("Timebox.EndDate").getString("value");
-                String iterationName = attributes.getJSONObject("Timebox.Name").getString("value");
-                String stateCode = attributes.getJSONObject("Timebox.State.Code").getString("value");
+
                 String createDate = attributes.getJSONObject("CreateDate").getString("value");
                 String changeDate = attributes.getJSONObject("ChangeDate").getString("value");
                 String doneHrs = attributes.getJSONObject("Children.Actuals.Value.@Sum").getString("value");
                 String toDoHrs = attributes.getJSONObject("Children.ToDo.@Sum").getString("value");
                 String detailEstimateHrs = attributes.getJSONObject("Children.DetailEstimate.@Sum").getString("value");
 
-                VersionOneTimebox timebox = new VersionOneTimebox(iterationName, beginDate, endDate, stateCode);
+                Object timeboxIdValue = attributes.getJSONObject("Timebox.ID").get("value");
+
+                VersionOneTimebox timebox = null;
+                if (timeboxIdValue != null && timeboxIdValue instanceof JSONObject) {
+                    String timeboxId = ((JSONObject)timeboxIdValue).getString("idref");
+
+                    String iterationName = attributes.getJSONObject("Timebox.Name").getString("value");
+                    String stateCode = attributes.getJSONObject("Timebox.State.Code").getString("value");
+
+                    timebox = new VersionOneTimebox(timeboxId, iterationName, beginDate, endDate, stateCode);
+                }
+
                 VersionOneStory story = new VersionOneStory(name, beginDate, endDate, statusName, createDate,
                         changeDate, detailEstimateHrs, doneHrs, toDoHrs);
-                if (iterations.containsKey(timebox)) {
-                    iterations.get(timebox).add(story);
+                if (storiesPerTimebox.containsKey(timebox)) {
+                    storiesPerTimebox.get(timebox).add(story);
                 } else {
                     List<VersionOneStory> stories = new ArrayList<>();
                     stories.add(story);
-                    iterations.put(timebox, stories);
+                    storiesPerTimebox.put(timebox, stories);
                 }
-
             }
 
         } catch (JSONException e) {
             logger.error("", e);
         }
-        return iterations;
+
+        return storiesPerTimebox;
     }
 }

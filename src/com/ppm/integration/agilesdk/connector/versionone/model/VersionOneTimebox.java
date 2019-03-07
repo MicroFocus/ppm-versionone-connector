@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.List;
 
 public class VersionOneTimebox extends VersionOneEntity {
+    private String timeboxId;
+
     private String timeboxName;
 
     private String beginDate;
@@ -18,8 +20,9 @@ public class VersionOneTimebox extends VersionOneEntity {
 
     private List<VersionOneStory> stories;
 
-    public VersionOneTimebox(String timeboxName, String beginDate, String endDate, String stateCode) {
+    public VersionOneTimebox(String timeboxId, String timeboxName, String beginDate, String endDate, String stateCode) {
 
+        this.timeboxId = timeboxId;
         this.timeboxName = timeboxName;
         this.beginDate = beginDate;
         this.endDate = endDate;
@@ -68,12 +71,7 @@ public class VersionOneTimebox extends VersionOneEntity {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((beginDate == null) ? 0 : beginDate.hashCode());
-        result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
-        result = prime * result + ((timeboxName == null) ? 0 : timeboxName.hashCode());
-        return result;
+        return timeboxId.hashCode();
     }
 
     @Override
@@ -85,22 +83,7 @@ public class VersionOneTimebox extends VersionOneEntity {
         if (getClass() != obj.getClass())
             return false;
         VersionOneTimebox other = (VersionOneTimebox)obj;
-        if (beginDate == null) {
-            if (other.beginDate != null)
-                return false;
-        } else if (!beginDate.equals(other.beginDate))
-            return false;
-        if (endDate == null) {
-            if (other.endDate != null)
-                return false;
-        } else if (!endDate.equals(other.endDate))
-            return false;
-        if (timeboxName == null) {
-            if (other.timeboxName != null)
-                return false;
-        } else if (!timeboxName.equals(other.timeboxName))
-            return false;
-        return true;
+        return this.timeboxId.equalsIgnoreCase(other.getTimeboxId());
     }
 
     @Override
@@ -149,5 +132,13 @@ public class VersionOneTimebox extends VersionOneEntity {
             default:
                 return TaskStatus.UNKNOWN;
         }
+    }
+
+    public String getTimeboxId() {
+        return timeboxId;
+    }
+
+    public void setTimeboxId(String timeboxId) {
+        this.timeboxId = timeboxId;
     }
 }

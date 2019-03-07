@@ -64,8 +64,8 @@ public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
                 actualEffort += actualEfforts.get(key);
             }
 
-            items.add(new VersionOneExternalWorkItem(entry.getKey(), actualEffort, entry.getKey() + " error", start,
-                    end, entry.getValue()));
+            items.add(new VersionOneExternalWorkItem(entry.getKey(), actualEffort, null, start,
+                    end, entry.getValue(), scopeId));
         }
 
         return items;

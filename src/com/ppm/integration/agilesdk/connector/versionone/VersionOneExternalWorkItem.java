@@ -11,6 +11,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.ppm.integration.agilesdk.tm.ExternalWorkItem;
 import com.ppm.integration.agilesdk.tm.ExternalWorkItemEffortBreakdown;
+import com.ppm.integration.agilesdk.tm.TimeSheetLineAgileEntityInfo;
 
 public class VersionOneExternalWorkItem extends ExternalWorkItem {
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -19,7 +20,9 @@ public class VersionOneExternalWorkItem extends ExternalWorkItem {
 
     private long totalEffort = 0;
 
-    private String errorMessage = null;
+    private String projectId = null;
+
+   private String errorMessage = null;
 
     private Map<String, Long> timeSpent = new HashMap<>();
 
@@ -28,13 +31,14 @@ public class VersionOneExternalWorkItem extends ExternalWorkItem {
     private XMLGregorianCalendar dateTo;
 
     public VersionOneExternalWorkItem(String name, long totalEffort, String errorMessage, XMLGregorianCalendar dateFrom,
-            XMLGregorianCalendar dateTo, Map<String, Long> timeSpent) {
+            XMLGregorianCalendar dateTo, Map<String, Long> timeSpent, String projectId) {
         this.name = name;
         this.totalEffort = totalEffort;
         this.errorMessage = errorMessage;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
         this.timeSpent = timeSpent;
+        this.projectId = projectId;
     }
 
     @Override
@@ -72,6 +76,11 @@ public class VersionOneExternalWorkItem extends ExternalWorkItem {
     @Override
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    public TimeSheetLineAgileEntityInfo getLineAgileEntityInfo() {
+        TimeSheetLineAgileEntityInfo info = new TimeSheetLineAgileEntityInfo(projectId);
+        return info;
     }
 
 }

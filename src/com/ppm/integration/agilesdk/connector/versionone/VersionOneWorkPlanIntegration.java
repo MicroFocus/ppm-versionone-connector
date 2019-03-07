@@ -36,16 +36,6 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
     }
 
-    public VersionOneWorkPlanIntegration(String username, String password, String baseUri) {
-        configureService(null, null, username, password, baseUri);
-    }
-
-    public VersionOneWorkPlanIntegration(String proxyHost, String proxyPort, String username, String password,
-            String baseUri) {
-        configureService(proxyHost, proxyPort, username, password, baseUri);
-
-    }
-
     @Override
     public List<Field> getMappingConfigurationFields(WorkPlanIntegrationContext context, ValueSet values) {
 
@@ -64,11 +54,7 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
                             @Override
                             public List<Option> getDynamicalOptions(ValueSet values) {
-                                configureService(values.get(VersionOneConstants.KEY_PROXY_HOST),
-                                        values.get(VersionOneConstants.KEY_PROXY_PORT),
-                                        values.get(VersionOneConstants.KEY_USERNAME),
-                                        values.get(VersionOneConstants.KEY_PASSWORD),
-                                        values.get(VersionOneConstants.KEY_BASE_URL));
+                                configureService(values);
                                 List<VersionOneScope> list = new ArrayList<>();
                                 try {
                                     list = service.getProjects();
@@ -98,9 +84,7 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
     @Override
     public ExternalWorkPlan getExternalWorkPlan(WorkPlanIntegrationContext context, ValueSet values) {
         String scopeId = values.get(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME);
-        configureService(values.get(VersionOneConstants.KEY_PROXY_HOST), values.get(VersionOneConstants.KEY_PROXY_PORT),
-                values.get(VersionOneConstants.KEY_USERNAME), values.get(VersionOneConstants.KEY_PASSWORD),
-                values.get(VersionOneConstants.KEY_BASE_URL));
+        configureService(values);
 
         final List<VersionOneTimebox> timeboxes = service.getTimeboxes(scopeId);
         return new ExternalWorkPlan() {
@@ -116,9 +100,14 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
         };
     }
 
-    private void configureService(String proxyHost, String proxyPort, String username, String password,
-            String baseUri)
+    private void configureService(ValueSet values)
     {
+        String proxyHost = values.get(VersionOneConstants.KEY_PROXY_HOST);
+        String proxyPort = values.get(VersionOneConstants.KEY_PROXY_PORT);
+        String username = values.get(VersionOneConstants.KEY_USERNAME);
+        String password = values.get(VersionOneConstants.KEY_PASSWORD);
+        String baseUri = values.get(VersionOneConstants.KEY_BASE_URL);
+
         service = service == null ? new VersionOneService() : service;
         IRestConfig config = new VersionOneRestConfig();
         config.setProxy(proxyHost, proxyPort);
