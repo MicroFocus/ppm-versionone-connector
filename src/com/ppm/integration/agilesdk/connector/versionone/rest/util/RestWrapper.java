@@ -56,13 +56,13 @@ public class RestWrapper {
     public Resource getJIRAResource(IRestConfig config, String uri) {
         restClient = createRestClient(config);
         Resource resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getBasicAuthorizaton());
+                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getAuthorizationHeader());
         return resource;
     }
 
     public Resource getJIRAResource(String uri) {
         Resource resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getBasicAuthorizaton());
+                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getAuthorizationHeader());
         return resource;
     }
 

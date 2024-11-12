@@ -29,7 +29,7 @@ import com.ppm.integration.agilesdk.ui.DynamicDropdown;
 import com.ppm.integration.agilesdk.ui.Field;
 import com.ppm.integration.agilesdk.ui.LineBreaker;
 import com.ppm.integration.agilesdk.ui.PasswordText;
-import com.ppm.integration.agilesdk.ui.PlainText;
+
 
 public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
 
@@ -40,14 +40,12 @@ public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
     @Override
     public List<ExternalWorkItem> getExternalWorkItems(TimeSheetIntegrationContext arg0, ValueSet values) {
 
-        // Synchronized ?
         final List<ExternalWorkItem> items = Collections.synchronizedList(new LinkedList<ExternalWorkItem>());
         XMLGregorianCalendar start = arg0.currentTimeSheet().getPeriodStartDate();
         XMLGregorianCalendar end = arg0.currentTimeSheet().getPeriodEndDate();
 
-        configureService(values.get(VersionOneConstants.KEY_PROXY_HOST), values.get(VersionOneConstants.KEY_PROXY_PORT),
-                values.get(VersionOneConstants.KEY_USERNAME), values.get(VersionOneConstants.KEY_PASSWORD),
-                values.get(VersionOneConstants.KEY_BASE_URL));
+        configureService(values);
+
         String scopeId = values.get(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME);
         String username = values.get(VersionOneConstants.KEY_USERNAME);
         Map<String, Map<String, Long>> map = service.getTimeSheet(start.toString().substring(0, 10),
@@ -74,23 +72,20 @@ public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
 
     @Override
     public List<Field> getMappingConfigurationFields(ValueSet arg0) {
-        return Arrays.asList(new Field[] {new PlainText(VersionOneConstants.KEY_USERNAME, "USERNAME", "", true),
-                new PasswordText(VersionOneConstants.KEY_PASSWORD, "PASSWORD", "", true), new LineBreaker(),
+        return Arrays.asList(new Field[] {new PasswordText(VersionOneConstants.KEY_USER_API_TOKEN, "USER_TOKEN", "", true),
+                new LineBreaker(),
                 new DynamicDropdown(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME, "VERSIONONE_PROJECT", false) {
 
                     @Override
                     public List<String> getDependencies() {
                         return Arrays.asList(
-                                new String[] {VersionOneConstants.KEY_USERNAME, VersionOneConstants.KEY_PASSWORD});
+                                new String[] {VersionOneConstants.KEY_USER_API_TOKEN});
                     }
 
                     @Override
                     public List<Option> getDynamicalOptions(ValueSet values) {
-                        configureService(values.get(VersionOneConstants.KEY_PROXY_HOST),
-                                values.get(VersionOneConstants.KEY_PROXY_PORT),
-                                values.get(VersionOneConstants.KEY_USERNAME),
-                                values.get(VersionOneConstants.KEY_PASSWORD),
-                                values.get(VersionOneConstants.KEY_BASE_URL));
+
+                        configureService(values);
 
                         List<VersionOneScope> list = new ArrayList<>();
                         try {
@@ -117,13 +112,22 @@ public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
         });
     }
 
-    private void configureService(String proxyHost, String proxyPort, String username, String password,
-            String baseUri)
+    private void configureService(ValueSet values)
     {
-        service = service == null ? new VersionOneService() : service;
+        String proxyHost = values.get(VersionOneConstants.KEY_PROXY_HOST);
+        String proxyPort = values.get(VersionOneConstants.KEY_PROXY_PORT);
+
+        String apiKey = values.get(VersionOneConstants.KEY_ADMIN_API_TOKEN);
+        if (!values.getBoolean(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, false)) {
+            apiKey = values.get(VersionOneConstants.KEY_USER_API_TOKEN);
+        }
+
+        String baseUri = values.get(VersionOneConstants.KEY_BASE_URL);
+
+        service = (service == null ? new VersionOneService() : service);
         IRestConfig config = new VersionOneRestConfig();
         config.setProxy(proxyHost, proxyPort);
-        config.setBasicAuthorizaton(username, password);
+        config.setBearerToken(apiKey);
         RestWrapper wrapper = new RestWrapper(config);
         service.setBaseUri(baseUri);
         service.setWrapper(wrapper);

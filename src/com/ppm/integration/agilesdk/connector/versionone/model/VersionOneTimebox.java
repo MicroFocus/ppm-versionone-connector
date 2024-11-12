@@ -88,13 +88,11 @@ public class VersionOneTimebox extends VersionOneEntity {
 
     @Override
     public String getName() {
-
         return this.timeboxName;
     }
 
     @Override
     public Date getScheduledFinish() {
-
         return toDate(this.endDate);
     }
 

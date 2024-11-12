@@ -39,17 +39,25 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
     @Override
     public List<Field> getMappingConfigurationFields(WorkPlanIntegrationContext context, ValueSet values) {
 
-        List<Field> fields =
-                Arrays.asList(new Field[] {new PlainText(VersionOneConstants.KEY_USERNAME, "USERNAME", "", true),
+        List<Field> fields = new ArrayList<>(2);
 
-                        new PasswordText(VersionOneConstants.KEY_PASSWORD, "PASSWORD", "", true), new LineBreaker(),
-                        new DynamicDropdown(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME, "VERSIONONE_PROJECT",
+        final boolean alwaysUseAdminToken = values.getBoolean(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, false);
+
+        if (!alwaysUseAdminToken) {
+            fields.add(new PasswordText(VersionOneConstants.KEY_USER_API_TOKEN, "USER_TOKEN", "", true));
+            fields.add(new LineBreaker());
+        }
+
+        fields.add(new DynamicDropdown(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME, "VERSIONONE_PROJECT",
                                 true) {
 
                             @Override
                             public List<String> getDependencies() {
-                                return Arrays.asList(new String[] {VersionOneConstants.KEY_USERNAME,
-                                        VersionOneConstants.KEY_PASSWORD});
+                                if (alwaysUseAdminToken) {
+                                    return new ArrayList<>();
+                                } else {
+                                    return Arrays.asList(new String[]{VersionOneConstants.KEY_USER_API_TOKEN});
+                                }
                             }
 
                             @Override
@@ -71,12 +79,11 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
                                 List<Option> optionList = new ArrayList<>();
                                 for (VersionOneScope project : list) {
                                     Option option = new Option(project.getScopeId(), project.getScopeName());
-
                                     optionList.add(option);
                                 }
                                 return optionList;
                             }
-                        }});
+                        });
 
         return fields;
     }
@@ -104,14 +111,18 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
     {
         String proxyHost = values.get(VersionOneConstants.KEY_PROXY_HOST);
         String proxyPort = values.get(VersionOneConstants.KEY_PROXY_PORT);
-        String username = values.get(VersionOneConstants.KEY_USERNAME);
-        String password = values.get(VersionOneConstants.KEY_PASSWORD);
+
+        String apiKey = values.get(VersionOneConstants.KEY_ADMIN_API_TOKEN);
+        if (!values.getBoolean(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, false)) {
+            apiKey = values.get(VersionOneConstants.KEY_USER_API_TOKEN);
+        }
+
         String baseUri = values.get(VersionOneConstants.KEY_BASE_URL);
 
-        service = service == null ? new VersionOneService() : service;
+        service = (service == null ? new VersionOneService() : service);
         IRestConfig config = new VersionOneRestConfig();
         config.setProxy(proxyHost, proxyPort);
-        config.setBasicAuthorizaton(username, password);
+        config.setBearerToken(apiKey);
         RestWrapper wrapper = new RestWrapper(config);
         service.setBaseUri(baseUri);
         service.setWrapper(wrapper);

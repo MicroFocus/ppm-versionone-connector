@@ -6,7 +6,9 @@ import java.util.List;
 
 import com.ppm.integration.agilesdk.FunctionIntegration;
 import com.ppm.integration.agilesdk.IntegrationConnector;
+import com.ppm.integration.agilesdk.ui.CheckBox;
 import com.ppm.integration.agilesdk.ui.Field;
+import com.ppm.integration.agilesdk.ui.PasswordText;
 import com.ppm.integration.agilesdk.ui.PlainText;
 
 /**
@@ -19,17 +21,17 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
 
     @Override
     public String getExternalApplicationName() {
-        return "VersionOne";
+        return "Digital.ai Agility";
     }
 
     @Override
     public String getExternalApplicationVersionIndication() {
-        return "2016 (16.3.5.270+)";
+        return "2024";
     }
 
     @Override
     public String getConnectorVersion() {
-        return "1.0";
+        return "2.0";
     }
 
     @Override
@@ -43,6 +45,8 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
         return Arrays.asList(new Field[] {new PlainText(VersionOneConstants.KEY_BASE_URL, "BASE_URL", "", true),
                 new PlainText(VersionOneConstants.KEY_PROXY_HOST, "PROXY_HOST", "", false),
                 new PlainText(VersionOneConstants.KEY_PROXY_PORT, "PROXY_PORT", "", false),
+                new PasswordText(VersionOneConstants.KEY_ADMIN_API_TOKEN, "ADMIN_TOKEN", "", true),
+                new CheckBox(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, "USE_ADMIN_TOKEN", "", false)
 
         });
     }
@@ -50,6 +54,8 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
     @Override
     public List<FunctionIntegration> getIntegrations() {
         return Arrays.asList(
-                new FunctionIntegration[] {new VersionOneWorkPlanIntegration(), new VersionOneTimeSheetIntegration()});
+                // new FunctionIntegration[] {new VersionOneWorkPlanIntegration(), new VersionOneTimeSheetIntegration()});
+                // Removing Timesheet integration as of PPM 25.1 - We can't reliably get username of current user with API Token
+                new FunctionIntegration[] {new VersionOneWorkPlanIntegration()});
     }
 }

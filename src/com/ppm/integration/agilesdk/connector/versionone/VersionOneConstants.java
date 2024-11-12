@@ -11,15 +11,13 @@ public interface VersionOneConstants {
 
     String KEY_PROXY_PORT = "proxyPort";
 
+    String KEY_USER_API_TOKEN = "userApiToken";
+
+    String KEY_ADMIN_API_TOKEN = "adminApiToken";
+
+    String KEY_ALWAYS_USE_ADMIN_API_TOKEN = "alwaysUseAdminToken";
+
     String KEY_USERNAME = "username";
-
-    String KEY_PASSWORD = "password";
-
-    String APP_CLIENT_ID = "clientId";
-
-    String APP_CLIENT_SECRET = "clientSecret";
-
-    String KEY_USE_GLOBAL_PROXY = "use_global_proxy";
 
     String KEY_VERSIONONE_PROJECT_NAME = "versionone_project_name";
 
