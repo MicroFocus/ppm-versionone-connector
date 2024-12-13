@@ -28,6 +28,10 @@ public interface VersionOneConstants {
     String PROJECT_SUFFIX =
             API_VERSION_API_DATA_ROOT + "Scope?sel=Name&where=AssetState='64'&Accept=application/json";
 
+    // Need to replace %EMAIL% with a valid email address (search won't be case-sensitive)
+    String MEMBER_SCOPES_SUFFIX =
+            API_VERSION_API_DATA_ROOT + "Member?sel=Scopes,Scopes.Name&Accept=application/json&where=Email='%EMAIL%'";
+
     String STORIES_WITH_TIMEBOX_SUFFIX = API_VERSION_API_DATA_ROOT
             + "Story?Accept=application/json&sort=Timebox.BeginDate&sel=Name,Status.Name,Timebox.Name,Timebox.State.Code,Timebox.BeginDate,Timebox.EndDate,Timebox.ID,CreateDate,ChangeDate,Children.Actuals.Value.@Sum,Children.ToDo.@Sum,Children.DetailEstimate.@Sum&where=Scope=";
 

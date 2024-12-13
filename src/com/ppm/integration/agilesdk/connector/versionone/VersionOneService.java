@@ -1,12 +1,16 @@
 
 package com.ppm.integration.agilesdk.connector.versionone;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
+import com.kintana.core.util.StringUtils;
+import com.mercury.itg.core.ContextProvider;
+import com.mercury.itg.core.ContextProviderImpl;
+import com.ppm.integration.IntegrationException;
+import com.ppm.integration.agilesdk.ValueSet;
+import com.ppm.integration.agilesdk.connector.versionone.rest.util.IRestConfig;
+import com.ppm.integration.agilesdk.connector.versionone.rest.util.VersionOneRestConfig;
 import com.ppm.integration.agilesdk.provider.Providers;
 import org.apache.log4j.Logger;
 import org.apache.wink.client.ClientResponse;
@@ -70,6 +74,83 @@ public class VersionOneService {
             logger.error("", e);
         }
         return list;
+    }
+
+    public List<VersionOneScope> getProjectsForCurrentPpmUser() {
+        String currentUserEmail = getPpmCurrentUserEmail();
+
+        if (StringUtils.isNullOrEmptyOrBlank(currentUserEmail)) {
+            throwExceptionWithUserVisibleErrorMessage("ERROR_EMAIL_NOT_CAPTURED_IN_PPM");
+        }
+
+        String url = (baseUri + VersionOneConstants.MEMBER_SCOPES_SUFFIX).replace("%EMAIL%", currentUserEmail);
+
+        ClientResponse response = wrapper.sendGet(url);
+
+        String jsonStr = response.getEntity(String.class);
+
+        List<VersionOneScope> list = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONObject(jsonStr).getJSONArray("Assets");
+
+            if (jsonArray.length() == 0) {
+                // User email is not a match
+                throw new RuntimeException("No user found in DAI Agility with email address "+currentUserEmail);
+            }
+            if (jsonArray.length() > 1) {
+                // Multiple users match
+                throw new RuntimeException("More than one user was found in DAI Agility with email address "+currentUserEmail);
+            }
+
+
+            JSONObject obj = jsonArray.getJSONObject(0).getJSONObject("Attributes");
+
+            JSONArray scopes = obj.getJSONObject("Scopes").getJSONArray("value");
+            JSONArray scopesNames = obj.getJSONObject("Scopes.Name").getJSONArray("value");
+
+            if (scopes.length() != scopesNames.length()) {
+                throwExceptionWithUserVisibleErrorMessage("ERROR_SCOPE_ID_NAME_DIFF");
+            }
+
+            for (int i = 0 ; i < scopes.length() ; i++) {
+                String id = scopes.getJSONObject(i).getString("idref");
+                String name = scopesNames.getString(i);
+                VersionOneScope project = new VersionOneScope(name, id);
+                list.add(project);
+            }
+
+        } catch (JSONException e) {
+            logger.error("", e);
+            throwExceptionWithUserVisibleErrorMessage("ERROR_UNEXPECTED");
+        }
+
+        list.sort(new Comparator<VersionOneScope>() {
+            @Override
+            public int compare(VersionOneScope o1, VersionOneScope o2) {
+                return o1.getScopeName().compareToIgnoreCase(o2.getScopeName());
+            }
+        });
+
+        return list;
+    }
+
+    private void throwExceptionWithUserVisibleErrorMessage(String messageKey, String...params) {
+        String message = Providers.getLocalizationProvider(VersionOneIntegrationConnector.class).getConnectorText(messageKey, params);
+        throw IntegrationException.build(VersionOneIntegrationConnector.class).setMessage(message);
+    }
+
+    private String getPpmCurrentUserEmail() {
+        com.mercury.itg.core.user.model.User user = new ContextProviderImpl().getCurrentUser();
+        if (user != null) {
+                String username = user.getUsername();
+                if (username != null && username.contains("@") && username.contains(".")) {
+                    // Username should be an email address - this is much more reliable than reading from the email user field since this cannot be easily tempered with.
+                    return username;
+                }
+                return user.getEmailAddress();
+        }
+
+        return null;
     }
 
     public List<VersionOneTimebox> getTimeboxes(String scopeId) {
@@ -209,5 +290,26 @@ public class VersionOneService {
         }
 
         return storiesPerTimebox;
+    }
+
+    public static VersionOneService fromValueSet(ValueSet values) {
+
+        VersionOneService service = new VersionOneService();
+
+        String proxyHost = values.get(VersionOneConstants.KEY_PROXY_HOST);
+        String proxyPort = values.get(VersionOneConstants.KEY_PROXY_PORT);
+
+        String apiKey = values.get(VersionOneConstants.KEY_ADMIN_API_TOKEN);
+        String baseUri = values.get(VersionOneConstants.KEY_BASE_URL);
+
+        service = (service == null ? new VersionOneService() : service);
+        IRestConfig config = new VersionOneRestConfig();
+        config.setProxy(proxyHost, proxyPort);
+        config.setBearerToken(apiKey);
+        RestWrapper wrapper = new RestWrapper(config);
+        service.setBaseUri(baseUri);
+        service.setWrapper(wrapper);
+
+        return service;
     }
 }

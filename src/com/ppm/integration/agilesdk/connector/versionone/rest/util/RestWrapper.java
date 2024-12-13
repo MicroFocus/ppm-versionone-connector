@@ -14,60 +14,25 @@ public class RestWrapper {
 
     private IRestConfig config;
 
-    public RestWrapper() {
-        restClient = new RestClient();
-    }
-
     public RestWrapper(IRestConfig config) {
         this.config = config;
         restClient = createRestClient(config);
     }
 
-    public IRestConfig getConfig() {
-        return config;
-    }
-
-    public void setConfig(IRestConfig config) {
-        this.config = config;
-    }
-
-    public RestClient getRestClient() {
-        return restClient;
-    }
-
-    public void setRestClient(RestClient restClient) {
-        this.restClient = restClient;
-    }
 
     public RestClient createRestClient(IRestConfig config) {
         restClient = new RestClient(config.getClientConfig());
         return restClient;
     }
 
-    public Resource getResource(String uri) {
-        return restClient.resource(uri);
-    }
-
-    public Resource getResource(IRestConfig config, String uri) {
-        restClient = createRestClient(config);
-        return restClient.resource(uri);
-    }
-
-    public Resource getJIRAResource(IRestConfig config, String uri) {
-        restClient = createRestClient(config);
-        Resource resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getAuthorizationHeader());
-        return resource;
-    }
-
-    public Resource getJIRAResource(String uri) {
+    private Resource getResource(String uri) {
         Resource resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getAuthorizationHeader());
         return resource;
     }
 
     public ClientResponse sendGet(String uri) {
-        Resource resource = this.getJIRAResource(uri);
+        Resource resource = this.getResource(uri);
         ClientResponse response = resource.get();
         int statusCode = response.getStatusCode();
         if (statusCode != 200) {

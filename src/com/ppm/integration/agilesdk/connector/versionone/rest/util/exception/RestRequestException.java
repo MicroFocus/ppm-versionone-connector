@@ -1,6 +1,9 @@
 
 package com.ppm.integration.agilesdk.connector.versionone.rest.util.exception;
 
+import com.ppm.integration.agilesdk.connector.versionone.VersionOneIntegrationConnector;
+import com.ppm.integration.agilesdk.provider.Providers;
+
 public class RestRequestException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
@@ -27,6 +30,11 @@ public class RestRequestException extends RuntimeException {
 
     public String[] getParams() {
         return params;
+    }
+
+    @Override
+    public String getMessage() {
+        return "" + errorCode + " - " +  Providers.getLocalizationProvider(VersionOneIntegrationConnector.class).getConnectorText(msgKey, params);
     }
 
 }

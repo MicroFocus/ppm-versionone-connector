@@ -37,7 +37,7 @@ public class VersionOneRestConfig implements IRestConfig {
 
     @Override
     public void setBearerToken(String token) {
-        authenticationHeader = "Bearer: "+token;
+        authenticationHeader = "Bearer "+token;
     }
 
 }

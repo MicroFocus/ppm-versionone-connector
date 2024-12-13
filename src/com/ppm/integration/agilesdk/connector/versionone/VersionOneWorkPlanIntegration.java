@@ -65,7 +65,7 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
                                 configureService(values);
                                 List<VersionOneScope> list = new ArrayList<>();
                                 try {
-                                    list = service.getProjects();
+                                    list = service.getProjectsForCurrentPpmUser();
                                 } catch (ClientRuntimeException | RestRequestException e) {
                                     logger.error("VersionOne Workplan", e);
                                     new VersionOneConnectivityExceptionHandler().uncaughtException(

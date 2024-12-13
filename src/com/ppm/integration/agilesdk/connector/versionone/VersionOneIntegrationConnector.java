@@ -6,10 +6,8 @@ import java.util.List;
 
 import com.ppm.integration.agilesdk.FunctionIntegration;
 import com.ppm.integration.agilesdk.IntegrationConnector;
-import com.ppm.integration.agilesdk.ui.CheckBox;
-import com.ppm.integration.agilesdk.ui.Field;
-import com.ppm.integration.agilesdk.ui.PasswordText;
-import com.ppm.integration.agilesdk.ui.PlainText;
+import com.ppm.integration.agilesdk.ValueSet;
+import com.ppm.integration.agilesdk.ui.*;
 
 /**
  * @author baijuy The connector provides the integration for ppm with
@@ -36,8 +34,7 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
 
     @Override
     public String getTargetApplicationIcon() {
-
-        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAIWSURBVDhPlVPPa9RQEP5etrvasJLU3Qqe9CT+RLYoWrwo6s1LL4o9ePAvUPQk3q0H6UU8CULxDxD0IuKxUNvLIj2URqXqdn9mm6SuzZps8px5bWJsFfSD5JvMzJv53rw80ajX5bCuQ8YxhBCQUoIMkKGYLJC1kynmb2xAuK4rDcMg1//D8zxoquMfEJMijjEndvZhMIvvQV9WH8/Ar3koFGkr5IzCEBce3FJSeWuapqWLsmAFwnUcaZgmpkfOwXOb2I0iQvyAXjZwp/NOJUZRjNVGA0O5nPoeRAOU95YQhgFtQbmA284siuUSXNRREDoGdohHo2dVbG5+AV27i1arjVazBdteg64PK1UaT5XBhe525jElO9g/fhSCZPftdby6eR+nx89g5fMXNKnAkvUBJ44d2VxESBXwXhP7xuxzdONP0PeMYOHZU7x9/QbOuofaag2jpRLy+bzK4+apAj5X0qQmzjg1MYmg58MsHMD7e0+w5vdgLVu4dPF8OlB+/1KwbcqHr1xGKH3IIQ2F6lcsrli4fu3qVnQTOxVksG/sEJ1GH8hp2BUHCGnylcpJ1eifFLSrFiIECL71sISPmJ56qPyclzTjd/ofpFWJ+cdZfPES7blldRrm8YOoTE6o+ST3hXPoGkA4VMCkAtkggxOyyMaZ+fGogKaRweAF7GTevpiRjTMrEP92ndlBLVRC0ulvzPB9Hz8BEWcv9hHRVP4AAAAASUVORK5CYII=";
+        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAVUSURBVEhLfVZtTJVlGL6e93wDAnIAFTig4gdKIIoLFrNMUGlzli6otZY//OP6mdWUnFs1NS3+tOX6UVttbbVA3dRMFtKa1UzyI79FMz3QgeR4ADnncD7fp+t5zwE5GF3bw/ve9/M+930/1/1xEJgGTZ37s6WILwZEHYR8DlKWSSBP7QkIL//eBORJCXma8s32+pYh4+AUPOag+cReTdq15VLqr/PwOqoKuaYLhD7h4Xan0MTBcFyeO9bQEk9sJZBysLlrj1WXoomn3uLZSqqmveEUKEdX+HErdO2b9rU7wwn1JAPNP75L45YdUsodFB0JbQKkABbNBKvJQkkiHI8hqqtAld0UhLhadWF6/8iaHYYTw8HG7/dodof2Ujyuf0YxTekUlOFZjixU5cxHQboTMywOpkJiOBKA2z+IC747GOH7FISEENuEtH7VVv9m3Kw0dqu5Sur623ydMG7VzHgqvwzrC1fAlZEPszDBHw1B0wTSzXaEYhGsGvXgqPsMrgzdw6rZ5bBpFpz+55o9GItsB+LXaeasaDq1N4uBfqhLuZUKTRlXH75auhrPFlShP+jDD54L8AQeGPf1MeIY6anNW0Tn1XRmQ/vdn1HlnM8gzPjk+nEMhkYUd19qEG+Yyrc0VLBadlIxUxnn9bB6TgU2z63DuQe3cbyvG0uyC9FYVM0on8BI2I+LQ3dwc6QPfYFBuNLzUZO/GHaTFYFYGN3eHgRjYVpBHlcXLyxq6c6ljCsUpTmxjrS4ebiLkTfQ2XLnQpzyXMJHlw/jl/vXmNtEcq8Ou43oQ/EI8h0zEwlNgl8U6ECdpgvZSNmgRqPfaucCRpWL79zdWMH3BZkFaL3cjg7POSNqlWAFRc0rpc9iGalRFTXZeBKCFDVqdLUoqYDDZEMRjUf1GP4OPiA1LvzUfxUlGbOwnJWkqmocNpZs+UwXlvKbMd7gz9F+9PLWEZ6dhMVmjoG88XJWhzKtafCGR2EieTm2GegZ7sXqgkqjUiZjJBLEx1eP8i3hlHlkf0RZaWOGrECzuQY1j5D0xIeUwqgWi9kCfzyELFu60WwKKpAsBuJhhXl4U7VUtfkYWFyS+UeQGj3fTwpMVtTgONeRyatG0T82hOrcRege7EF5dgk2uJ6kvBCbSmrxYkld8tT/QMBLInAjKRrV0BfwGk1VzPK7yE5dljMXFtb3yd7fUZo5By8U12K2PQdnvbd54j9SmwJ5w7T0tbWsf45jfq0IUt2qkluWXYSOvvMGTc+X1BgdfII9cfjerzjjvYEB3k5hcuKnQOfWQTbaGkWaGstGo/ljIcPoM2wqleSu/j8wEBzCHPaHGnJ3/APjbWBUUFlWITv3IWIyZUor9NFBq6liy/oA8zCPimouIxzPmI+daUPdrCVYkuXC7dEBo8FusQ+Uodlp2WjgGHm59GnuF+Oy7y6GoylDT4XQJqB/bRhs6txXKYX+ObUrlaxg4bCr4bxpLFyJ4ow8o3JUEahmtLKaONDosN8YdtdG3NBTq+ciY916qL7lvOGg8dh7IsNh3iyF/IJihtIpqLmUa81EpXMeCh1OZFiT45rR9vq9uOT7C6PRIMNNcpZAkGurHpXfHmncpU9kaFPXPotJyu38+B2KE07GoW6k+kCZijAX8cc5VwjQ4H4p4/sPNeyOKMWEA4XNnQcsQsQ28pW/anIFn1MacVoofkgLDmi6PNy2dlfU0BIpDhQ2dHwg7Ca9gjvbKK7njebyOZ0jZdhNJjvI3KcQ8UuH1uxOScZjDsbRfGrfDNKxgNO2hg2iJm4Zl5NLneG/LejhLU8yUb9x/1ZbfctD6qYA+BfqjSkn5D8SfwAAAABJRU5ErkJggg==";
     }
 
     @Override
@@ -46,6 +43,7 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
                 new PlainText(VersionOneConstants.KEY_PROXY_HOST, "PROXY_HOST", "", false),
                 new PlainText(VersionOneConstants.KEY_PROXY_PORT, "PROXY_PORT", "", false),
                 new PasswordText(VersionOneConstants.KEY_ADMIN_API_TOKEN, "ADMIN_TOKEN", "", true),
+                new LabelText("EMAIL_NOTICE", "EMAIL_NOTICE", "", false),
                 new CheckBox(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, "USE_ADMIN_TOKEN", "", false)
 
         });
@@ -57,5 +55,17 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
                 // new FunctionIntegration[] {new VersionOneWorkPlanIntegration(), new VersionOneTimeSheetIntegration()});
                 // Removing Timesheet integration as of PPM 25.1 - We can't reliably get username of current user with API Token
                 new FunctionIntegration[] {new VersionOneWorkPlanIntegration()});
+    }
+
+    @Override
+    public String testConnection(ValueSet instanceConfigurationParameters) {
+        try {
+            VersionOneService service = VersionOneService.fromValueSet(instanceConfigurationParameters);
+            service.getProjects();
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+
+        return null;
     }
 }

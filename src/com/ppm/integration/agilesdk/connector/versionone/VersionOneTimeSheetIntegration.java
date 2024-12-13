@@ -89,7 +89,7 @@ public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
 
                         List<VersionOneScope> list = new ArrayList<>();
                         try {
-                            list = service.getProjects();
+                            list = service.getProjectsForCurrentPpmUser();
                         } catch (ClientRuntimeException | RestRequestException e) {
                             logger.error("VersionOne TimeSheet", e);
                             new VersionOneConnectivityExceptionHandler().uncaughtException(Thread.currentThread(), e,
