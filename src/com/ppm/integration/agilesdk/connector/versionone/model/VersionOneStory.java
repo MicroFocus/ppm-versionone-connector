@@ -1,12 +1,13 @@
 
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import com.ppm.integration.agilesdk.pm.ExternalTaskActuals;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
+
 
 public class VersionOneStory extends VersionOneEntity {
     private String storyName;
@@ -199,5 +200,20 @@ public class VersionOneStory extends VersionOneEntity {
             default:
                 return TaskStatus.UNKNOWN;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "VersionOneStory{" +
+                "storyName='" + storyName + '\'' +
+                ", beginDate='" + beginDate + '\'' +
+                ", endDate='" + endDate + '\'' +
+                ", statusName='" + statusName + '\'' +
+                ", createDate='" + createDate + '\'' +
+                ", changeDate='" + changeDate + '\'' +
+                ", detailEstimateHrs='" + detailEstimateHrs + '\'' +
+                ", doneHrs='" + doneHrs + '\'' +
+                ", toDoHrs='" + toDoHrs + '\'' +
+                '}';
     }
 }

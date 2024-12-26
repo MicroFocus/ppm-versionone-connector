@@ -6,11 +6,9 @@ import org.apache.wink.client.ClientConfig;
 public interface IRestConfig {
     ClientConfig setProxy(String proxyHost, String proxyPort);
 
-    ClientConfig setBasicAuthorizatonWithBasicAuthHandler(String username, String password);
+    void setBearerToken(String token);
 
-    void setBasicAuthorizaton(String username, String password);
-
-    String getBasicAuthorizaton();
+    String getAuthorizationHeader();
 
     ClientConfig getClientConfig();
 }

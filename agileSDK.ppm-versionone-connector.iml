@@ -12,4 +12,7 @@
     <orderEntry type="module" module-name="PPM_Model" />
     <orderEntry type="module" module-name="spi" />
   </component>
+  <component name="SonarLintModuleSettings">
+    <option name="uniqueId" value="93f3e797-2f78-4417-bc9d-871d17d8a53a" />
+  </component>
 </module>
