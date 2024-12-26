@@ -139,4 +139,16 @@ public class VersionOneTimebox extends VersionOneEntity {
     public void setTimeboxId(String timeboxId) {
         this.timeboxId = timeboxId;
     }
+
+    @Override
+    public String toString() {
+        return "VersionOneTimebox{" +
+                "timeboxId='" + timeboxId + '\'' +
+                ", timeboxName='" + timeboxName + '\'' +
+                ", beginDate='" + beginDate + '\'' +
+                ", endDate='" + endDate + '\'' +
+                ", stateCode='" + stateCode + '\'' +
+                ", stories=" + stories +
+                '}';
+    }
 }

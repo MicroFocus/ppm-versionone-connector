@@ -242,6 +242,11 @@ public class VersionOneService {
         ClientResponse response = wrapper.sendGet(baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + "%22"+scopeId+"%22");
 
         String jsonStr = response.getEntity(String.class);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("<=== Received JSon: "+jsonStr);
+        }
+
         try {
 
             JSONObject jsonObj = new JSONObject(jsonStr);
@@ -278,10 +283,19 @@ public class VersionOneService {
                         changeDate, detailEstimateHrs, doneHrs, toDoHrs);
                 if (storiesPerTimebox.containsKey(timebox)) {
                     storiesPerTimebox.get(timebox).add(story);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("++ Adding new story to timebox ID " + timeboxIdValue + ": "+story.toString());
+                    }
                 } else {
                     List<VersionOneStory> stories = new ArrayList<>();
                     stories.add(story);
                     storiesPerTimebox.put(timebox, stories);
+                    if (logger.isDebugEnabled()) {
+                        if (timebox != null) {
+                            logger.debug("+ Adding new Timebox:" + timebox.toString());
+                        }
+                        logger.debug("++ Adding new story to Timebox ID " + timeboxIdValue + ": "+story.toString());
+                    }
                 }
             }
 

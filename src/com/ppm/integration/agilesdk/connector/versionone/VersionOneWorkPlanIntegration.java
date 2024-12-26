@@ -93,6 +93,8 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
         String scopeId = values.get(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME);
         configureService(values);
 
+        debugValueSet(values);
+
         final List<VersionOneTimebox> timeboxes = service.getTimeboxes(scopeId);
         return new ExternalWorkPlan() {
 
@@ -105,6 +107,17 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
                 return externalTasks;
             }
         };
+    }
+
+    private void debugValueSet(ValueSet values) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("### Starting work plan sync. List of Value Set (except API Token:");
+            for (String key : values.keySet()) {
+                if (!VersionOneConstants.KEY_ADMIN_API_TOKEN.equals(key) && !VersionOneConstants.KEY_USER_API_TOKEN.equals(key)) {
+                    logger.debug("#   "+key+" : "+values.get(key));
+                }
+            }
+        }
     }
 
     private void configureService(ValueSet values)
