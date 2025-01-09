@@ -125,7 +125,7 @@ public class VersionOneStory extends VersionOneEntity {
 
     @Override
     public Date getScheduledStart() {
-        if (beginDate.compareTo(createDate) < 0) {
+        if (beginDate == null) {
             return toDate(this.createDate);
         }
         return toDate(this.beginDate);

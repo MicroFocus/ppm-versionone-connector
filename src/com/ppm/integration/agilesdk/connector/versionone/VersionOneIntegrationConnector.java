@@ -29,7 +29,7 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
 
     @Override
     public String getConnectorVersion() {
-        return "2.0";
+        return "2.1";
     }
 
     @Override
