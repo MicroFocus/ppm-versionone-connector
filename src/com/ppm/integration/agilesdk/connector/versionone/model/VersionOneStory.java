@@ -1,26 +1,16 @@
-
 package com.ppm.integration.agilesdk.connector.versionone.model;
 
-import java.util.Arrays;
+import com.ppm.integration.agilesdk.connector.versionone.VersionOneWorkPlanIntegration;
+import com.ppm.integration.agilesdk.pm.ExternalTaskActuals;
+
 import java.util.Date;
 import java.util.List;
 
-import com.ppm.integration.agilesdk.pm.ExternalTaskActuals;
-
-
-
-public class VersionOneStory extends VersionOneEntity {
-    private String storyName;
+public class VersionOneStory extends VersionOneWorkItem {
 
     private String beginDate;
 
     private String endDate;
-
-    private String statusName;
-
-    private String createDate;
-
-    private String changeDate;
 
     private String detailEstimateHrs;
 
@@ -28,25 +18,14 @@ public class VersionOneStory extends VersionOneEntity {
 
     private String toDoHrs;
 
-    public VersionOneStory(String storyName, String beginDate, String endDate, String statusName, String createDate,
-            String changeDate, String detailEstimateHrs, String doneHrs, String toDoHrs) {
-        this.storyName = storyName;
+
+    public VersionOneStory(String storyId, String storyName, String beginDate, String endDate, String statusName, String createDate, String detailEstimateHrs, String doneHrs, String toDoHrs, VersionOneWorkPlanIntegration.TaskCreationContext context) {
+        super(storyId, storyName, statusName, createDate, context);
         this.beginDate = beginDate;
         this.endDate = endDate;
-        this.statusName = statusName;
-        this.createDate = createDate;
-        this.changeDate = changeDate;
         this.detailEstimateHrs = detailEstimateHrs;
         this.doneHrs = doneHrs;
         this.toDoHrs = toDoHrs;
-    }
-
-    public String getStoryName() {
-        return storyName;
-    }
-
-    public void setStoryName(String storyName) {
-        this.storyName = storyName;
     }
 
     public String getBeginDate() {
@@ -63,30 +42,6 @@ public class VersionOneStory extends VersionOneEntity {
 
     public void setEndDate(String endDate) {
         this.endDate = endDate;
-    }
-
-    public String getStatusName() {
-        return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
-    }
-
-    public String getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(String createDate) {
-        this.createDate = createDate;
-    }
-
-    public String getChangeDate() {
-        return changeDate;
-    }
-
-    public void setChangeDate(String changeDate) {
-        this.changeDate = changeDate;
     }
 
     public String getDetailEstimateHrs() {
@@ -114,106 +69,59 @@ public class VersionOneStory extends VersionOneEntity {
     }
 
     @Override
-    public String getName() {
-        return this.storyName;
-    }
-
-    @Override
     public Date getScheduledFinish() {
-        return toDate(this.endDate);
+        return toDate(this.endDate, true);
     }
 
     @Override
     public Date getScheduledStart() {
         if (beginDate == null) {
-            return toDate(this.createDate);
+            return toDate(this.getCreateDate());
         }
         return toDate(this.beginDate);
     }
 
     @Override
     public List<ExternalTaskActuals> getActuals() {
-        ExternalTaskActuals etl = new ExternalTaskActuals() {
-            @Override
-            public double getScheduledEffort() {
-                if ("null".equals(detailEstimateHrs)) {
-                    return 0.0;
-                }
-                return Double.parseDouble(detailEstimateHrs);
-            }
 
-            @Override
-            public Date getActualFinish() {
-                return super.getActualFinish();
-            }
-
-            @Override
-            public Date getActualStart() {
-                return (!"null".equals(doneHrs)) && Double.parseDouble(doneHrs) > 0 ? toDate(beginDate) : null;
-            }
-
-            @Override
-            public Date getEstimatedFinishDate() {
-                return super.getEstimatedFinishDate();
-            }
-
-            @Override
-            public Double getEstimatedRemainingEffort() {
-                if ("null".equals(toDoHrs)) {
-                    return 0.0;
-                }
-                return Double.parseDouble(toDoHrs);
-            }
-
-            @Override
-            public double getPercentComplete() {
-                try {
-                    double done = Double.parseDouble(doneHrs);
-                    double todo = Double.parseDouble(toDoHrs);
-                    return done / (done + todo) * 100;
-                } catch (Exception e) {
-                    return 0.0;
-                }
-            }
-
-        };
-        return Arrays.asList(new ExternalTaskActuals[] {etl});
-    }
-
-    @Override
-    public TaskStatus getStatus() {
-
-        return getTaskStatus(this.statusName);
-    }
-
-    private TaskStatus getTaskStatus(String status) {
-
-        switch (status) {
-            case "Future":
-                return TaskStatus.IN_PLANNING;
-            case "In Progress":
-                return TaskStatus.IN_PROGRESS;
-            case "Done":
-                return TaskStatus.COMPLETED;
-            case "Accepted":
-                return TaskStatus.COMPLETED;
-            default:
-                return TaskStatus.UNKNOWN;
+        double scheduledEffort = 10.0d;
+        if (!"null".equals(detailEstimateHrs)) {
+            scheduledEffort = Double.parseDouble(detailEstimateHrs);
         }
+
+        double actualEffort = 0.0d;
+        if (context.importActualEffort) {
+            if ("null".equals(doneHrs)) {
+                actualEffort =  0.0d;
+            } else {
+                actualEffort = Double.parseDouble(doneHrs);
+            }
+        }
+
+        Double remainingEffort = null;
+        if (context.importActualEffort) {
+            if ("null".equals(toDoHrs)) {
+                remainingEffort =  0.0d;
+            } else {
+                remainingEffort = Double.parseDouble(toDoHrs);
+            }
+        }
+
+        double percentComplete = 0.0;
+        if (context.importActualEffort) {
+
+            try {
+                double done = Double.parseDouble(doneHrs);
+                double todo = Double.parseDouble(toDoHrs);
+                percentComplete = done / (done + todo) * 100;
+            } catch (Exception e) {
+                percentComplete = 0.0;
+            }
+        }
+
+        Date actualStart = context.importActualEffort ? ((!"null".equals(doneHrs)) && Double.parseDouble(doneHrs) > 0 ? toDate(beginDate) : null) : null;
+
+        return generateActuals(scheduledEffort, actualEffort, remainingEffort, percentComplete, actualStart);
     }
 
-    @Override
-    public String toString() {
-        return "VersionOneStory{" +
-                "storyName='" + storyName + '\'' +
-                ", beginDate='" + beginDate + '\'' +
-                ", endDate='" + endDate + '\'' +
-                ", statusName='" + statusName + '\'' +
-                ", createDate='" + createDate + '\'' +
-                ", changeDate='" + changeDate + '\'' +
-                ", detailEstimateHrs='" + detailEstimateHrs + '\'' +
-                ", doneHrs='" + doneHrs + '\'' +
-                ", toDoHrs='" + toDoHrs + '\'' +
-                '}';
-    }
 }

@@ -18,10 +18,9 @@ public class VersionOneTimebox extends VersionOneEntity {
 
     private String stateCode;
 
-    private List<VersionOneStory> stories;
+    private List<VersionOneWorkItem> stories;
 
     public VersionOneTimebox(String timeboxId, String timeboxName, String beginDate, String endDate, String stateCode) {
-
         this.timeboxId = timeboxId;
         this.timeboxName = timeboxName;
         this.beginDate = beginDate;
@@ -61,11 +60,11 @@ public class VersionOneTimebox extends VersionOneEntity {
         this.stateCode = stateCode;
     }
 
-    public List<VersionOneStory> getStories() {
+    public List<VersionOneWorkItem> getStories() {
         return stories;
     }
 
-    public void setStories(List<VersionOneStory> stories) {
+    public void setStories(List<VersionOneWorkItem> stories) {
         this.stories = stories;
     }
 
@@ -86,14 +85,20 @@ public class VersionOneTimebox extends VersionOneEntity {
         return this.timeboxId.equalsIgnoreCase(other.getTimeboxId());
     }
 
+
     @Override
     public String getName() {
         return this.timeboxName;
     }
 
     @Override
+    public String getId() {
+        return timeboxId;
+    }
+
+    @Override
     public Date getScheduledFinish() {
-        return toDate(this.endDate);
+        return toDate(this.endDate, true);
     }
 
     @Override
@@ -111,7 +116,7 @@ public class VersionOneTimebox extends VersionOneEntity {
     @Override
     public List<ExternalTask> getChildren() {
         List<ExternalTask> list = new ArrayList<>();
-        for (VersionOneStory s : stories) {
+        for (VersionOneWorkItem s : stories) {
             list.add(s);
         }
 

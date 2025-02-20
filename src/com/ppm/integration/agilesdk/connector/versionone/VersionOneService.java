@@ -5,10 +5,10 @@ import java.util.*;
 
 
 import com.kintana.core.util.StringUtils;
-import com.mercury.itg.core.ContextProvider;
 import com.mercury.itg.core.ContextProviderImpl;
 import com.ppm.integration.IntegrationException;
 import com.ppm.integration.agilesdk.ValueSet;
+import com.ppm.integration.agilesdk.connector.versionone.model.*;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.IRestConfig;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.VersionOneRestConfig;
 import com.ppm.integration.agilesdk.provider.Providers;
@@ -18,10 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneActualForTimesheet;
-import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneScope;
-import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneStory;
-import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneTimebox;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.RestWrapper;
 
 public class VersionOneService {
@@ -76,11 +72,16 @@ public class VersionOneService {
         return list;
     }
 
-    public List<VersionOneScope> getProjectsForCurrentPpmUser() {
+    public List<VersionOneScope> getProjectsForCurrentPpmUser(ValueSet values) {
         String currentUserEmail = getPpmCurrentUserEmail();
 
         if (StringUtils.isNullOrEmptyOrBlank(currentUserEmail)) {
-            throwExceptionWithUserVisibleErrorMessage("ERROR_EMAIL_NOT_CAPTURED_IN_PPM");
+            String missingEmailMessage = values.get(VersionOneConstants.KEY_MISSING_EMAIL_MESSAGE);
+            if (StringUtils.isNullOrEmptyOrBlank(missingEmailMessage)) {
+                throwExceptionWithUserVisibleErrorMessage(true, "ERROR_EMAIL_NOT_CAPTURED_IN_PPM");
+            } else {
+                throwExceptionWithUserVisibleErrorMessage(false, missingEmailMessage);
+            }
         }
 
         String url = (baseUri + VersionOneConstants.MEMBER_SCOPES_SUFFIX).replace("%EMAIL%", currentUserEmail);
@@ -109,7 +110,7 @@ public class VersionOneService {
             JSONArray scopesNames = obj.getJSONObject("Scopes.Name").getJSONArray("value");
 
             if (scopes.length() != scopesNames.length()) {
-                throwExceptionWithUserVisibleErrorMessage("ERROR_SCOPE_ID_NAME_DIFF");
+                throwExceptionWithUserVisibleErrorMessage(true, "ERROR_SCOPE_ID_NAME_DIFF");
             }
 
             for (int i = 0 ; i < scopes.length() ; i++) {
@@ -121,7 +122,7 @@ public class VersionOneService {
 
         } catch (JSONException e) {
             logger.error("", e);
-            throwExceptionWithUserVisibleErrorMessage("ERROR_UNEXPECTED");
+            throwExceptionWithUserVisibleErrorMessage(true, "ERROR_UNEXPECTED");
         }
 
         list.sort(new Comparator<VersionOneScope>() {
@@ -134,8 +135,12 @@ public class VersionOneService {
         return list;
     }
 
-    private void throwExceptionWithUserVisibleErrorMessage(String messageKey, String...params) {
-        String message = Providers.getLocalizationProvider(VersionOneIntegrationConnector.class).getConnectorText(messageKey, params);
+    private void throwExceptionWithUserVisibleErrorMessage(boolean resolveMessage, String messageKey, String...params) {
+        String message = messageKey;
+        if (resolveMessage) {
+            message = Providers.getLocalizationProvider(VersionOneIntegrationConnector.class).getConnectorText(messageKey, params);
+        }
+
         throw IntegrationException.build(VersionOneIntegrationConnector.class).setMessage(message);
     }
 
@@ -153,12 +158,13 @@ public class VersionOneService {
         return null;
     }
 
-    public List<VersionOneTimebox> getTimeboxes(String scopeId) {
-        Map<VersionOneTimebox, List<VersionOneStory>> iterations = getStoriesPerTimebox(scopeId);
+    public List<VersionOneTimebox> getTimeboxes(VersionOneWorkPlanIntegration.TaskCreationContext context, String scopeId, boolean includeClosedSprints, boolean includeStoriesInNoSprint) {
+
+        Map<VersionOneTimebox, List<VersionOneWorkItem>> iterations = getStoriesPerTimebox(context, scopeId, includeClosedSprints, includeStoriesInNoSprint);
 
         List<VersionOneTimebox> timeboxes = new ArrayList<>();
 
-        for (Map.Entry<VersionOneTimebox, List<VersionOneStory>> entry : iterations.entrySet()) {
+        for (Map.Entry<VersionOneTimebox, List<VersionOneWorkItem>> entry : iterations.entrySet()) {
 
             VersionOneTimebox timebox = entry.getKey();
             if (timebox == null) {
@@ -237,9 +243,16 @@ public class VersionOneService {
         return url.replaceAll(" ", "%20").replaceAll(">", "%3E").replaceAll("<", "%3C").replaceAll("@", "%40");
     }
 
-    private Map<VersionOneTimebox, List<VersionOneStory>> getStoriesPerTimebox(String scopeId) {
-        Map<VersionOneTimebox, List<VersionOneStory>> storiesPerTimebox = new HashMap<>();
-        ClientResponse response = wrapper.sendGet(baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + "%22"+scopeId+"%22");
+    private Map<VersionOneTimebox, List<VersionOneWorkItem>> getStoriesPerTimebox(VersionOneWorkPlanIntegration.TaskCreationContext context, String scopeId, boolean includeClosedSprints, boolean includeStoriesInNoSprint) {
+        Map<VersionOneTimebox, List<VersionOneWorkItem>> storiesPerTimebox = new HashMap<>();
+        String getString = baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + "%22"+scopeId+"%22";
+        if (!includeClosedSprints) {
+            getString += ";Timebox.State.Code!='CLSD'";
+        }
+        if (!includeStoriesInNoSprint) {
+            getString += ";Timebox.ID!=''";
+        }
+        ClientResponse response = wrapper.sendGet(getString);
 
         String jsonStr = response.getEntity(String.class);
 
@@ -256,13 +269,13 @@ public class VersionOneService {
                 JSONObject asset = jsonAssets.getJSONObject(i);
                 JSONObject attributes = asset.getJSONObject("Attributes");
                 String name = attributes.getJSONObject("Name").getString("value");
+                String id = asset.getString("id");
                 String statusName = attributes.getJSONObject("Status.Name").getString("value");
 
                 String beginDate = attributes.getJSONObject("Timebox.BeginDate").getString("value");
                 String endDate = attributes.getJSONObject("Timebox.EndDate").getString("value");
 
                 String createDate = attributes.getJSONObject("CreateDate").getString("value");
-                String changeDate = attributes.getJSONObject("ChangeDate").getString("value");
                 String doneHrs = attributes.getJSONObject("Children.Actuals.Value.@Sum").getString("value");
                 String toDoHrs = attributes.getJSONObject("Children.ToDo.@Sum").getString("value");
                 String detailEstimateHrs = attributes.getJSONObject("Children.DetailEstimate.@Sum").getString("value");
@@ -279,15 +292,16 @@ public class VersionOneService {
                     timebox = new VersionOneTimebox(timeboxId, iterationName, beginDate, endDate, stateCode);
                 }
 
-                VersionOneStory story = new VersionOneStory(name, beginDate, endDate, statusName, createDate,
-                        changeDate, detailEstimateHrs, doneHrs, toDoHrs);
+                VersionOneStory story = new VersionOneStory(id, name, beginDate, endDate, statusName, createDate,
+                        detailEstimateHrs, doneHrs, toDoHrs, context);
+                story.setOwnersNames(attributes.getJSONObject("Owners.Name"));
                 if (storiesPerTimebox.containsKey(timebox)) {
                     storiesPerTimebox.get(timebox).add(story);
                     if (logger.isDebugEnabled()) {
                         logger.debug("++ Adding new story to timebox ID " + timeboxIdValue + ": "+story.toString());
                     }
                 } else {
-                    List<VersionOneStory> stories = new ArrayList<>();
+                    List<VersionOneWorkItem> stories = new ArrayList<>();
                     stories.add(story);
                     storiesPerTimebox.put(timebox, stories);
                     if (logger.isDebugEnabled()) {
@@ -302,6 +316,20 @@ public class VersionOneService {
         } catch (JSONException e) {
             logger.error("", e);
         }
+
+
+        // Following corrections are here just in case query string isn't working properly.
+        /*if (!includeStoriesInNoSprint) {
+            storiesPerTimebox.remove(null);
+        }
+        if (!includeClosedSprints) {
+            List<VersionOneTimebox> timeboxes = new ArrayList<>(storiesPerTimebox.keySet());
+            for (VersionOneTimebox timebox : timeboxes) {
+                if (VersionOneConstants.TIMEBOX_STATUS_CLOSED.equalsIgnoreCase(timebox.getStateCode())) {
+                    storiesPerTimebox.remove(timebox);
+                }
+            }
+        }*/
 
         return storiesPerTimebox;
     }
@@ -325,5 +353,82 @@ public class VersionOneService {
         service.setWrapper(wrapper);
 
         return service;
+    }
+
+    public List<VersionOneRequest> importRequestEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String requestTypeName, String scopeId, ValueSet values) {
+        List<VersionOneRequest> requests = new ArrayList<>();
+        String getString = baseUri + VersionOneConstants.REQUESTS_SUFFIX + "%22"+ requestTypeName + "%22;Scope=%22"+scopeId+"%22";
+        ClientResponse response = wrapper.sendGet(getString);
+
+        String jsonStr = response.getEntity(String.class);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("<=== Received JSon: "+jsonStr);
+        }
+
+        try {
+
+            JSONObject jsonObj = new JSONObject(jsonStr);
+
+            JSONArray jsonAssets = jsonObj.getJSONArray("Assets");
+            for (int i = 0; i < jsonAssets.length(); i++) {
+                JSONObject asset = jsonAssets.getJSONObject(i);
+                JSONObject attributes = asset.getJSONObject("Attributes");
+                String name = attributes.getJSONObject("Name").getString("value");
+                String id = asset.getString("id");
+                String statusName = attributes.getJSONObject("Status.Name").getString("value");
+                String createDate = attributes.getJSONObject("CreateDate").getString("value");
+
+                String neededByDate = attributes.has("Custom_NeededbyDate") ? attributes.getJSONObject("Custom_NeededbyDate").getString("value") : null;
+
+                VersionOneRequest request = new VersionOneRequest(id, name, statusName, createDate, neededByDate, taskContext);
+                request.setOwnersNames(attributes.getJSONObject("Owner.Name"));
+                requests.add(request);
+            }
+
+        } catch (JSONException e) {
+            logger.error("", e);
+        }
+
+        return requests;
+    }
+
+    public List<VersionOneEpic> importEpicEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String epicTypesName, String scopeId, ValueSet values) {
+        List<VersionOneEpic> epics = new ArrayList<>();
+        String getString = baseUri + VersionOneConstants.EPICS_SUFFIX + "%22"+ epicTypesName + "%22;Scope=%22"+scopeId+"%22";
+        ClientResponse response = wrapper.sendGet(getString);
+
+        String jsonStr = response.getEntity(String.class);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("<=== Received JSon: "+jsonStr);
+        }
+
+        try {
+
+            JSONObject jsonObj = new JSONObject(jsonStr);
+
+            JSONArray jsonAssets = jsonObj.getJSONArray("Assets");
+            for (int i = 0; i < jsonAssets.length(); i++) {
+                JSONObject asset = jsonAssets.getJSONObject(i);
+                JSONObject attributes = asset.getJSONObject("Attributes");
+                String name = attributes.getJSONObject("Name").getString("value");
+                String id = asset.getString("id");
+                String statusName = attributes.getJSONObject("Status.Name").getString("value");
+                String createDate = attributes.getJSONObject("CreateDate").getString("value");
+
+                String plannedStart = attributes.has("PlannedStart") ? attributes.getJSONObject("PlannedStart").getString("value") : null;
+                String plannedEnd = attributes.has("PlannedEnd") ? attributes.getJSONObject("PlannedEnd").getString("value") : null;
+
+                VersionOneEpic epic = new VersionOneEpic(id, name, statusName, createDate, plannedStart, plannedEnd, taskContext);
+                epic.setOwnersNames(attributes.getJSONObject("Owners.Name"));
+                epics.add(epic);
+            }
+
+        } catch (JSONException e) {
+            logger.error("", e);
+        }
+
+        return epics;
     }
 }

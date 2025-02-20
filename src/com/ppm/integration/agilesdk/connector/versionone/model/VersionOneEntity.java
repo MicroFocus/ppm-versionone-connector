@@ -16,7 +16,26 @@ public class VersionOneEntity extends ExternalTask implements VersionOneConstant
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
+    /**
+     * VersionOne will add one day to all finish dates because of some obscure reason of midnight not being included in closing date window.
+     * Basically, the finish date is exclusive (that's how I understand it). Since it's inclusive in PPM, we remove one day to the finish dates.
+     */
+    private Date adjustFinishDate(Date d) {
+        if (d == null) {
+            return null;
+        }
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(d);
+        cal.add(Calendar.DATE, -1);
+        return cal.getTime();
+    }
+
     Date toDate(String dateStr) {
+        return toDate(dateStr, false);
+    }
+
+    Date toDate(String dateStr, boolean adjustDateForFinish) {
         if (dateStr != null && !NULL_VALUE.equalsIgnoreCase(dateStr)) {
 
             Date d = null;
@@ -27,22 +46,21 @@ public class VersionOneEntity extends ExternalTask implements VersionOneConstant
                 d = format.parse(dateStr);
             } catch (ParseException e) {
                 logger.error("Date Parse Error,the input dateStr is " + dateStr, e);
-                Calendar c = Calendar.getInstance();
-                c.set(Calendar.HOUR_OF_DAY, 0);
-                c.set(Calendar.MINUTE, 0);
-                c.set(Calendar.SECOND, 0);
-                c.set(Calendar.MILLISECOND, 0);
-                return c.getTime();
+                return getDefaultDate();
             }
-            return d;
+            return adjustDateForFinish ? adjustFinishDate(d) : d;
         } else {
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.HOUR_OF_DAY, 0);
-            c.set(Calendar.MINUTE, 0);
-            c.set(Calendar.SECOND, 0);
-            c.set(Calendar.MILLISECOND, 0);
-            return c.getTime();
+            return getDefaultDate();
 
         }
+    }
+
+    private Date getDefaultDate() {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        return c.getTime();
     }
 }

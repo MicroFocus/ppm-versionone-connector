@@ -7,6 +7,8 @@ import java.util.List;
 import com.ppm.integration.agilesdk.FunctionIntegration;
 import com.ppm.integration.agilesdk.IntegrationConnector;
 import com.ppm.integration.agilesdk.ValueSet;
+import com.ppm.integration.agilesdk.provider.LocalizationProvider;
+import com.ppm.integration.agilesdk.provider.Providers;
 import com.ppm.integration.agilesdk.ui.*;
 
 /**
@@ -39,13 +41,37 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
 
     @Override
     public List<Field> getDriverConfigurationFields() {
+
+        LocalizationProvider lp = Providers.getLocalizationProvider(VersionOneIntegrationConnector.class);
+
         return Arrays.asList(new Field[] {new PlainText(VersionOneConstants.KEY_BASE_URL, "BASE_URL", "", true),
                 new PlainText(VersionOneConstants.KEY_PROXY_HOST, "PROXY_HOST", "", false),
                 new PlainText(VersionOneConstants.KEY_PROXY_PORT, "PROXY_PORT", "", false),
                 new PasswordText(VersionOneConstants.KEY_ADMIN_API_TOKEN, "ADMIN_TOKEN", "", true),
+                new LineBreaker(),
                 new LabelText("EMAIL_NOTICE", "EMAIL_NOTICE", "", false),
-                new CheckBox(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, "USE_ADMIN_TOKEN", "", false)
+                new CheckBox(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, "USE_ADMIN_TOKEN", "", false),
+                new PlainText(VersionOneConstants.KEY_MISSING_EMAIL_MESSAGE, "MISSING_EMAIL_MESSAGE", lp.getConnectorText("ERROR_EMAIL_NOT_CAPTURED_IN_PPM"), "block", false),
+                new LineBreaker(),
+                new LabelText("", "STATUS_MAPPING_LABEL", "block", false),
+                new LineBreaker(),
+                new PlainText(VersionOneConstants.KEY_TASK_STATUS_READY, "STATUS_READY_LABEL", "Future", false),
+                new PlainText(VersionOneConstants.KEY_TASK_STATUS_IN_PROGRESS, "STATUS_IN_PROGRESS_LABEL", "In Progress;In Test", false),
+                new PlainText(VersionOneConstants.KEY_TASK_STATUS_COMPLETED, "STATUS_COMPLETED_LABEL", "Done;Accepted", false),
+                new PlainText(VersionOneConstants.KEY_TASK_STATUS_CANCELLED, "STATUS_CANCELLED_LABEL", "", false),
+                new PlainText(VersionOneConstants.KEY_TASK_STATUS_UNKNOWN, "STATUS_UNKNOWN_LABEL", "", false),
+                new LineBreaker(),
 
+                new LabelText("", "IMPORT_OPTIONS", "block", false),
+                new LineBreaker(),
+                new CheckBox(VersionOneConstants.KEY_ALLOW_STORIES, "ALLOW_STORIES", "", false),
+                new PlainText(VersionOneConstants.KEY_ALLOW_REQUESTS, "REQUEST_CATEGORY_TYPES", "Feature", false),
+                new PlainText(VersionOneConstants.KEY_ALLOW_EPICS, "EPIC_CATEGORY_TYPES", "Epic", false),
+                new LineBreaker(),
+
+                new LabelText("", "ACTUAL_EFFORT_IMPORT_LABEL", "block", false),
+                new LineBreaker(),
+                new CheckBox(VersionOneConstants.KEY_IMPORT_ACTUAL_EFFORT, "IMPORT_ACTUAL_EFFORT", "", false)
         });
     }
 
