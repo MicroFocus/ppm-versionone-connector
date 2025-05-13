@@ -50,7 +50,6 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
                 new PasswordText(VersionOneConstants.KEY_ADMIN_API_TOKEN, "ADMIN_TOKEN", "", true),
                 new LineBreaker(),
                 new LabelText("EMAIL_NOTICE", "EMAIL_NOTICE", "", false),
-                new CheckBox(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, "USE_ADMIN_TOKEN", "", false),
                 new PlainText(VersionOneConstants.KEY_MISSING_EMAIL_MESSAGE, "MISSING_EMAIL_MESSAGE", lp.getConnectorText("ERROR_EMAIL_NOT_CAPTURED_IN_PPM"), "block", false),
                 new LineBreaker(),
                 new LabelText("", "STATUS_MAPPING_LABEL", "block", false),
@@ -64,15 +63,40 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
 
                 new LabelText("", "IMPORT_OPTIONS", "block", false),
                 new LineBreaker(),
-                new CheckBox(VersionOneConstants.KEY_ALLOW_STORIES, "ALLOW_STORIES", "", false),
-                new PlainText(VersionOneConstants.KEY_ALLOW_REQUESTS, "REQUEST_CATEGORY_TYPES", "Feature", false),
-                new PlainText(VersionOneConstants.KEY_ALLOW_EPICS, "EPIC_CATEGORY_TYPES", "Epic", false),
-                new LineBreaker(),
 
-                new LabelText("", "ACTUAL_EFFORT_IMPORT_LABEL", "block", false),
+                new PlainText(VersionOneConstants.KEY_PICK_RESOURCES_FROM_THESE_SUB_TYPES, "PICK_RESOURCES_FROM_THESE_SUB_TYPES", "Story;Defect", true),
+                new SelectList(VersionOneConstants.KEY_PPM_REQUEST_FIELD_TYPE,"PPM_REQUEST_FIELD_TYPE",VersionOneConstants.PPM_REQUEST_FIELD_TYPE_REQUEST_HEADER,true)
+                        .addLevel(VersionOneConstants.KEY_PPM_REQUEST_FIELD_TYPE, "PPM_REQUEST_FIELD_TYPE")
+                        .addOption(new SelectList.Option(VersionOneConstants.PPM_REQUEST_FIELD_TYPE_REQUEST_HEADER,"REQUEST_FIELD_TYPE_REQUEST_HEADER"))
+                        .addOption(new SelectList.Option(VersionOneConstants.PPM_REQUEST_FIELD_TYPE_REQUEST_DETAILS,"REQUEST_FIELD_TYPE_REQUEST_DETAILS")),
+                new SelectList(VersionOneConstants.KEY_PPM_REQUEST_FIELD_PARAMETER_TYPE,"PPM_REQUEST_FIELD_PARAMETER_TYPE",VersionOneConstants.PPM_REQUEST_FIELD_PARAMETER_TYPE_VISIBLE,true)
+                        .addLevel(VersionOneConstants.KEY_PPM_REQUEST_FIELD_PARAMETER_TYPE, "PPM_REQUEST_FIELD_PARAMETER_TYPE")
+                        .addOption(new SelectList.Option(VersionOneConstants.PPM_REQUEST_FIELD_PARAMETER_TYPE_VISIBLE,"PPM_REQUEST_FIELD_PARAMETER_TYPE_VISIBLE"))
+                        .addOption(new SelectList.Option(VersionOneConstants.PPM_REQUEST_FIELD_PARAMETER_TYPE_PARAMETER,"PPM_REQUEST_FIELD_PARAMETER_TYPE_PARAMETER")),
+                getColumnSelect(),
+                getBatchSelect(),
                 new LineBreaker(),
-                new CheckBox(VersionOneConstants.KEY_IMPORT_ACTUAL_EFFORT, "IMPORT_ACTUAL_EFFORT", "", false)
         });
+    }
+
+    private Field getColumnSelect() {
+        SelectList columnSelect = new SelectList(VersionOneConstants.KEY_PPM_REQUEST_FIELD_COLUMN,"PPM_REQUEST_FIELD_COLUMN", "1",true)
+                .addLevel(VersionOneConstants.KEY_PPM_REQUEST_FIELD_COLUMN, "PPM_REQUEST_FIELD_COLUMN");
+        for (int i = 1 ; i <= 50 ; i++) {
+            columnSelect.addOption(new SelectList.Option(""+i,""+i));
+        }
+
+        return columnSelect;
+    }
+
+    private Field getBatchSelect() {
+        SelectList columnSelect = new SelectList(VersionOneConstants.KEY_PPM_REQUEST_FIELD_BATCH,"PPM_REQUEST_FIELD_BATCH", "1",true)
+                .addLevel(VersionOneConstants.KEY_PPM_REQUEST_FIELD_BATCH, "PPM_REQUEST_FIELD_BATCH");
+        for (int i = 1 ; i <= 6 ; i++) {
+            columnSelect.addOption(new SelectList.Option(""+i,""+i));
+        }
+
+        return columnSelect;
     }
 
     @Override

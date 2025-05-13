@@ -90,36 +90,12 @@ public class VersionOneStory extends VersionOneWorkItem {
         }
 
         double actualEffort = 0.0d;
-        if (context.importActualEffort) {
-            if ("null".equals(doneHrs)) {
-                actualEffort =  0.0d;
-            } else {
-                actualEffort = Double.parseDouble(doneHrs);
-            }
-        }
 
         Double remainingEffort = null;
-        if (context.importActualEffort) {
-            if ("null".equals(toDoHrs)) {
-                remainingEffort =  0.0d;
-            } else {
-                remainingEffort = Double.parseDouble(toDoHrs);
-            }
-        }
 
         double percentComplete = 0.0;
-        if (context.importActualEffort) {
 
-            try {
-                double done = Double.parseDouble(doneHrs);
-                double todo = Double.parseDouble(toDoHrs);
-                percentComplete = done / (done + todo) * 100;
-            } catch (Exception e) {
-                percentComplete = 0.0;
-            }
-        }
-
-        Date actualStart = context.importActualEffort ? ((!"null".equals(doneHrs)) && Double.parseDouble(doneHrs) > 0 ? toDate(beginDate) : null) : null;
+        Date actualStart = null;
 
         return generateActuals(scheduledEffort, actualEffort, remainingEffort, percentComplete, actualStart);
     }

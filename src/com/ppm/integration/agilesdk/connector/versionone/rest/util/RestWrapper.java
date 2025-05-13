@@ -10,6 +10,9 @@ import org.apache.wink.client.RestClient;
 
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.exception.RestRequestException;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 public class RestWrapper {
     private RestClient restClient;
 
@@ -29,8 +32,8 @@ public class RestWrapper {
     }
 
     private Resource getResource(String uri) {
-        Resource resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getAuthorizationHeader());
+        Resource  resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getAuthorizationHeader());
         return resource;
     }
 

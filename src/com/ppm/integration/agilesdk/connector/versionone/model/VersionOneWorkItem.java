@@ -117,7 +117,7 @@ public abstract class VersionOneWorkItem extends VersionOneEntity {
         }
     }
 
-    protected List<ExternalTaskActuals> generateActuals(double scheduledEffort, double actualEffort, Double remainingEffort, double percentComplete, Date actualStart) {
+    public List<ExternalTaskActuals> generateActuals(double scheduledEffort, double actualEffort, Double remainingEffort, double percentComplete, Date actualStart) {
 
         List<ExternalTaskActuals> actuals = new ArrayList<>();
 

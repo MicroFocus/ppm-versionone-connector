@@ -1,31 +1,31 @@
 
 package com.ppm.integration.agilesdk.connector.versionone;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.hp.ppm.user.model.User;
-import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneEpic;
-import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneRequest;
-import com.ppm.integration.agilesdk.provider.Providers;
-import com.ppm.integration.agilesdk.provider.UserProvider;
-import com.ppm.integration.agilesdk.ui.*;
-import org.apache.log4j.Logger;
-import org.apache.wink.client.ClientRuntimeException;
-import org.apache.commons.lang3.StringUtils;
-
+import com.mercury.itg.util.HibernateTemplate;
 import com.ppm.integration.agilesdk.ValueSet;
-import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneScope;
-import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneTimebox;
+import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneEpic;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.IRestConfig;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.RestWrapper;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.VersionOneRestConfig;
-import com.ppm.integration.agilesdk.connector.versionone.rest.util.exception.RestRequestException;
-import com.ppm.integration.agilesdk.connector.versionone.rest.util.exception.VersionOneConnectivityExceptionHandler;
 import com.ppm.integration.agilesdk.pm.ExternalTask;
 import com.ppm.integration.agilesdk.pm.ExternalWorkPlan;
 import com.ppm.integration.agilesdk.pm.WorkPlanIntegration;
 import com.ppm.integration.agilesdk.pm.WorkPlanIntegrationContext;
+import com.ppm.integration.agilesdk.provider.Providers;
+import com.ppm.integration.agilesdk.provider.UserProvider;
+import com.ppm.integration.agilesdk.ui.CheckBox;
+import com.ppm.integration.agilesdk.ui.Field;
+import com.ppm.integration.agilesdk.ui.LabelText;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StandardBasicTypes;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants.*;
 
 public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
@@ -40,82 +40,67 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
     @Override
     public List<Field> getMappingConfigurationFields(WorkPlanIntegrationContext context, ValueSet values) {
 
+        // First, let's make sure that this project has WBSid defined:
+        String wbsID = getWBSId(context, values);
+
         List<Field> fields = new ArrayList<>(2);
 
-        final boolean alwaysUseAdminToken = values.getBoolean(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, false);
-
-        if (!alwaysUseAdminToken) {
-            fields.add(new PasswordText(VersionOneConstants.KEY_USER_API_TOKEN, "USER_TOKEN", "", true));
-            fields.add(new LineBreaker());
-        }
-
-        fields.add(new DynamicDropdown(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME, "VERSIONONE_PROJECT",
-                                true) {
-
-                            @Override
-                            public List<String> getDependencies() {
-                                if (alwaysUseAdminToken) {
-                                    return new ArrayList<>();
-                                } else {
-                                    return Arrays.asList(new String[]{VersionOneConstants.KEY_USER_API_TOKEN});
-                                }
-                            }
-
-                            @Override
-                            public List<Option> getDynamicalOptions(ValueSet values) {
-                                configureService(values);
-                                List<VersionOneScope> list = new ArrayList<>();
-                                try {
-                                    list = service.getProjectsForCurrentPpmUser(values);
-                                } catch (ClientRuntimeException | RestRequestException e) {
-                                    logger.error("VersionOne Workplan", e);
-                                    new VersionOneConnectivityExceptionHandler().uncaughtException(
-                                            Thread.currentThread(), e, VersionOneWorkPlanIntegration.class);
-                                } catch (RuntimeException e) {
-                                    logger.error("VersionOne Workplan", e);
-                                    new VersionOneConnectivityExceptionHandler().uncaughtException(
-                                            Thread.currentThread(), e, VersionOneWorkPlanIntegration.class);
-                                }
-
-                                List<Option> optionList = new ArrayList<>();
-                                for (VersionOneScope project : list) {
-                                    Option option = new Option(project.getScopeId(), project.getScopeName());
-                                    optionList.add(option);
-                                }
-                                return optionList;
-                            }
-                        });
-
-        fields.add(new CheckBox(VersionOneConstants.WP_INCLUDE_CLOSED_SPRINTS, "WP_INCLUDE_CLOSED_SPRINTS", "", false));
-
-        fields.add(new CheckBox(VersionOneConstants.WP_INCLUDE_STORIES_NOT_IN_SPRINT, "WP_INCLUDE_STORIES_NOT_IN_SPRINT", "", false));
-
-        fields.add(new LineBreaker());
-
-        fields.add(new LabelText("", "ENTITIES_IMPORT_OPTIONS", "block", false));
-
-        if (values.getBoolean(VersionOneConstants.KEY_ALLOW_STORIES, true)) {
-            fields.add(new CheckBox(VersionOneConstants.KEY_IMPORT_STORIES, "ALLOW_STORIES", true));
-        }
-
-        List<String> requestTypeNames = getValues(values.get(VersionOneConstants.KEY_ALLOW_REQUESTS));
-        for (String requestTypeName : requestTypeNames) {
-            fields.add(new CheckBox(VersionOneConstants.KEY_IMPORT_REQUEST_PREFIX + requestTypeName, requestTypeName, false));
-        }
-
-        List<String> epicTypeNames = getValues(values.get(VersionOneConstants.KEY_ALLOW_EPICS));
-        for (String epicTypeName : epicTypeNames) {
-            fields.add(new CheckBox(VersionOneConstants.KEY_IMPORT_EPIC_PREFIX + epicTypeName, epicTypeName, false));
+        if (StringUtils.isBlank(wbsID)) {
+            // MISSING WBSID!
+            fields.add(new LabelText("MISSING_WBSID", "MISSING_WBSID", "", false));
+        } else {
+            // WBSID is found, not problem.
+            fields.add(new LabelText("WBSID_FOUND", "WBSid for this Project:"+wbsID, "", false));
         }
 
         return fields;
+    }
+
+    private String getWBSId(WorkPlanIntegrationContext context, final ValueSet values) {
+
+        // Calling context.currentProject() will fail when called from the work plan - so we must go through current task & work plan ID.
+        final long workplanId = context.currentTask().getWorkplanId();
+        HibernateTemplate wp = new HibernateTemplate() {
+
+            @Override
+            public void run() throws Exception {
+                NativeQuery query = getSession().createNativeQuery("select pfm_request_id from pm_projects where project_id = (select project_id from pm_work_plans where work_plan_id = :workplanId)");
+                query.setParameter("workplanId", workplanId);
+                query.addScalar("pfm_request_id", StandardBasicTypes.LONG);
+                setResult(query.uniqueResult());
+            }
+        };
+        wp.doRun();
+
+
+        final Long requestId = (Long) wp.getResult();
+
+        HibernateTemplate t = new HibernateTemplate() {
+            @Override
+            public void run() throws Exception {
+                String tableName = PPM_REQUEST_FIELD_TYPE_REQUEST_DETAILS.equals(values.get(KEY_PPM_REQUEST_FIELD_TYPE)) ? "KCRT_REQUEST_DETAILS" : "KCRT_REQ_HEADER_DETAILS";
+                String columnName = PPM_REQUEST_FIELD_PARAMETER_TYPE_PARAMETER.equals(values.get(KEY_PPM_REQUEST_FIELD_PARAMETER_TYPE)) ? "PARAMETER" : "VISIBLE_PARAMETER";
+                Integer batchNumber = StringUtils.isNumeric(values.get(KEY_PPM_REQUEST_FIELD_BATCH)) ? Integer.parseInt(values.get(KEY_PPM_REQUEST_FIELD_BATCH)) : 1;
+                Integer columnNumber = StringUtils.isNumeric(values.get(KEY_PPM_REQUEST_FIELD_COLUMN)) ? Integer.parseInt(values.get(KEY_PPM_REQUEST_FIELD_COLUMN)) : 1;
+                // Read Project Details fields that supposedly stores wbsID
+                NativeQuery query = getSession().createNativeQuery("SELECT "+columnName+columnNumber + " FROM "+tableName+ " WHERE REQUEST_ID = :requestId and BATCH_NUMBER = :batchNumber");
+                query.setParameter("requestId", requestId);
+                query.setParameter("batchNumber", batchNumber);
+                query.addScalar(columnName+columnNumber, StandardBasicTypes.STRING);
+                setResult(query.uniqueResult());
+            }
+        };
+        t.doRun();
+        return (String)t.getResult();
+
+
     }
 
     private List<String> getValues(String paramValue) {
         List<String> values = new ArrayList<>();
 
         if (!StringUtils.isBlank(paramValue)) {
-            values.addAll(Arrays.stream(StringUtils.split(paramValue,';')).map(String::trim).collect(Collectors.toList()));
+            values.addAll(Arrays.stream(StringUtils.split(paramValue, ';')).map(String::trim).collect(Collectors.toList()));
         }
 
         return values;
@@ -123,7 +108,9 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
     @Override
     public ExternalWorkPlan getExternalWorkPlan(WorkPlanIntegrationContext context, ValueSet values) {
-        String scopeId = values.get(VersionOneConstants.KEY_VERSIONONE_PROJECT_NAME);
+
+        String wbsID = getWBSId(context, values);
+
         configureService(values);
 
         debugValueSet(values);
@@ -132,46 +119,16 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
         List<ExternalTask> externalTasks = new ArrayList<>();
 
-        int entitiesCount = 0;
-        if (values.getBoolean(VersionOneConstants.KEY_IMPORT_STORIES, true)) {
-            ++entitiesCount;
-        }
-        List<String> requestTypesNames = getImportNames(values, VersionOneConstants.KEY_IMPORT_REQUEST_PREFIX);
-        entitiesCount += requestTypesNames.size();
-        List<String> epicTypesNames = getImportNames(values, VersionOneConstants.KEY_IMPORT_EPIC_PREFIX);
-        entitiesCount += epicTypesNames.size();
-
-        // Importing Stories
-        if (values.getBoolean(VersionOneConstants.KEY_IMPORT_STORIES, true)) {
-            final List<VersionOneTimebox> sprints = service.getTimeboxes(taskContext, scopeId, values.getBoolean(VersionOneConstants.WP_INCLUDE_CLOSED_SPRINTS, false), values.getBoolean(VersionOneConstants.WP_INCLUDE_STORIES_NOT_IN_SPRINT, false));
-            if (entitiesCount <= 1) {
-                externalTasks.addAll(sprints);
-            } else {
-                externalTasks.add(getWrappingTask(Providers.getLocalizationProvider(VersionOneIntegrationConnector.class).getConnectorText("ALLOW_STORIES"), sprints));
-            }
-        }
-
-        // Importing Requests Entities
-
-        for (String requestTypesName : requestTypesNames) {
-            final List<VersionOneRequest> requests = service.importRequestEntities(taskContext, requestTypesName, scopeId, values);
-            if (entitiesCount <= 1) {
-                externalTasks.addAll(requests);
-            } else {
-                externalTasks.add(getWrappingTask(requestTypesName + "s", requests));
-            }
+        List<String> subTypesNames = getImportNames(values, VersionOneConstants.KEY_PICK_RESOURCES_FROM_THESE_SUB_TYPES);
+        if (subTypesNames == null || subTypesNames.isEmpty()) {
+            subTypesNames = new ArrayList<>();
+            subTypesNames.add("Story");
+            subTypesNames.add("Defect");
         }
 
         // Importing Epic Entities
-
-        for (String epicTypesName : epicTypesNames) {
-            final List<VersionOneEpic> epics = service.importEpicEntities(taskContext, epicTypesName, scopeId, values);
-            if (entitiesCount <= 1) {
-                externalTasks.addAll(epics);
-            } else {
-                externalTasks.add(getWrappingTask(epicTypesName + "s", epics));
-            }
-        }
+        final List<VersionOneEpic> epics = service.importEpicFeaturesEntities(taskContext, wbsID, subTypesNames, values);
+        externalTasks.addAll(epics);
 
         return new ExternalWorkPlan() {
             @Override
@@ -220,22 +177,18 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
         if (logger.isDebugEnabled()) {
             logger.debug("### Starting work plan sync. List of Value Set (except API Token:");
             for (String key : values.keySet()) {
-                if (!VersionOneConstants.KEY_ADMIN_API_TOKEN.equals(key) && !VersionOneConstants.KEY_USER_API_TOKEN.equals(key)) {
-                    logger.debug("#   "+key+" : "+values.get(key));
+                if (!VersionOneConstants.KEY_ADMIN_API_TOKEN.equals(key)) {
+                    logger.debug("#   " + key + " : " + values.get(key));
                 }
             }
         }
     }
 
-    private void configureService(ValueSet values)
-    {
+    private void configureService(ValueSet values) {
         String proxyHost = values.get(VersionOneConstants.KEY_PROXY_HOST);
         String proxyPort = values.get(VersionOneConstants.KEY_PROXY_PORT);
 
         String apiKey = values.get(VersionOneConstants.KEY_ADMIN_API_TOKEN);
-        if (!values.getBoolean(VersionOneConstants.KEY_ALWAYS_USE_ADMIN_API_TOKEN, false)) {
-            apiKey = values.get(VersionOneConstants.KEY_USER_API_TOKEN);
-        }
 
         String baseUri = values.get(VersionOneConstants.KEY_BASE_URL);
 
@@ -259,14 +212,12 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
         private UserProvider userProvider = null;
 
-        public boolean importActualEffort = false;
         public TaskCreationContext(ValueSet config) {
             addStatus(ExternalTask.TaskStatus.READY, VersionOneConstants.KEY_TASK_STATUS_READY, config);
             addStatus(ExternalTask.TaskStatus.IN_PROGRESS, VersionOneConstants.KEY_TASK_STATUS_IN_PROGRESS, config);
             addStatus(ExternalTask.TaskStatus.COMPLETED, VersionOneConstants.KEY_TASK_STATUS_COMPLETED, config);
             addStatus(ExternalTask.TaskStatus.CANCELLED, VersionOneConstants.KEY_TASK_STATUS_CANCELLED, config);
             addStatus(ExternalTask.TaskStatus.UNKNOWN, VersionOneConstants.KEY_TASK_STATUS_UNKNOWN, config);
-            importActualEffort = config.getBoolean(VersionOneConstants.KEY_IMPORT_ACTUAL_EFFORT, false);
         }
 
         public ExternalTask.TaskStatus getPpmStatus(String daiStatusName) {

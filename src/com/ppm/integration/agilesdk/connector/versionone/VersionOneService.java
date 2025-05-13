@@ -1,10 +1,13 @@
 
 package com.ppm.integration.agilesdk.connector.versionone;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 import com.kintana.core.util.StringUtils;
+import com.kintana.core.util.URLEncoder;
 import com.mercury.itg.core.ContextProviderImpl;
 import com.ppm.integration.IntegrationException;
 import com.ppm.integration.agilesdk.ValueSet;
@@ -19,6 +22,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.RestWrapper;
+
+import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants.EMAIL_FIELD;
 
 public class VersionOneService {
     private final Logger logger = Logger.getLogger(this.getClass());
@@ -422,6 +427,55 @@ public class VersionOneService {
 
                 VersionOneEpic epic = new VersionOneEpic(id, name, statusName, createDate, plannedStart, plannedEnd, taskContext);
                 epic.setOwnersNames(attributes.getJSONObject("Owners.Name"));
+                epics.add(epic);
+            }
+
+        } catch (JSONException e) {
+            logger.error("", e);
+        }
+
+        return epics;
+    }
+
+    public List<VersionOneEpic> importEpicFeaturesEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String wbsID, List<String> subTypesNames, ValueSet values) {
+        List<VersionOneEpic> epics = new ArrayList<>();
+        String emailField = EMAIL_FIELD.replace("%WBSid%", wbsID);
+        String getString =  VersionOneConstants.EPICS_FEATURES_PATH_AND_PARAMS;
+
+        getString = getString.replace("%WBSid%", wbsID);
+        getString = getString.replace("%EmailField%", emailField);
+        getString = getString.replace("%SubsAssetTypeFilter%", subTypesNames.stream().map((st) -> "Subs.AssetType='"+st+"'").collect(Collectors.joining("|")));
+        getString = getString.replace(" ", "%20");
+        getString = getString.replace("|", "%7C");
+
+        getString = baseUri + VersionOneConstants.API_VERSION_API_DATA_ROOT + getString;
+
+        ClientResponse response = wrapper.sendGet(getString);
+
+        String jsonStr = response.getEntity(String.class);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("<=== Received JSon: "+jsonStr);
+        }
+
+        try {
+
+            JSONObject jsonObj = new JSONObject(jsonStr);
+
+            JSONArray jsonAssets = jsonObj.getJSONArray("Assets");
+            for (int i = 0; i < jsonAssets.length(); i++) {
+                JSONObject asset = jsonAssets.getJSONObject(i);
+                JSONObject attributes = asset.getJSONObject("Attributes");
+                String name = attributes.getJSONObject("Name").getString("value");
+                String id = asset.getString("id");
+                String statusName = attributes.getJSONObject("Status.Name").getString("value");
+                String createDate = attributes.getJSONObject("CreateDate").getString("value");
+
+                String plannedStart = attributes.has("PlannedStart") ? attributes.getJSONObject("PlannedStart").getString("value") : null;
+                String plannedEnd = attributes.has("PlannedEnd") ? attributes.getJSONObject("PlannedEnd").getString("value") : null;
+
+                VersionOneEpic epic = new VersionOneEpic(id, name, statusName, createDate, plannedStart, plannedEnd, taskContext);
+                epic.setOwnersNames(attributes.getJSONObject(emailField));
                 epics.add(epic);
             }
 
