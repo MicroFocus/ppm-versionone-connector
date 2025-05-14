@@ -22,7 +22,7 @@ public abstract class VersionOneWorkItem extends VersionOneEntity {
 
     private String id;
 
-    private String name;
+    protected String name;
 
     private String statusName;
 

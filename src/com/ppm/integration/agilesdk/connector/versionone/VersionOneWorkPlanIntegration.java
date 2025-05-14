@@ -119,15 +119,8 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
         List<ExternalTask> externalTasks = new ArrayList<>();
 
-        List<String> subTypesNames = getImportNames(values, VersionOneConstants.KEY_PICK_RESOURCES_FROM_THESE_SUB_TYPES);
-        if (subTypesNames == null || subTypesNames.isEmpty()) {
-            subTypesNames = new ArrayList<>();
-            subTypesNames.add("Story");
-            subTypesNames.add("Defect");
-        }
-
         // Importing Epic Entities
-        final List<VersionOneEpic> epics = service.importEpicFeaturesEntities(taskContext, wbsID, subTypesNames, values);
+        final List<VersionOneEpic> epics = service.importEpicFeaturesEntities(taskContext, wbsID, values);
         externalTasks.addAll(epics);
 
         return new ExternalWorkPlan() {

@@ -23,7 +23,7 @@ import org.json.JSONObject;
 
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.RestWrapper;
 
-import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants.EMAIL_FIELD;
+import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants.*;
 
 public class VersionOneService {
     private final Logger logger = Logger.getLogger(this.getClass());
@@ -163,7 +163,7 @@ public class VersionOneService {
         return null;
     }
 
-    public List<VersionOneTimebox> getTimeboxes(VersionOneWorkPlanIntegration.TaskCreationContext context, String scopeId, boolean includeClosedSprints, boolean includeStoriesInNoSprint) {
+    /*public List<VersionOneTimebox> getTimeboxes(VersionOneWorkPlanIntegration.TaskCreationContext context, String scopeId, boolean includeClosedSprints, boolean includeStoriesInNoSprint) {
 
         Map<VersionOneTimebox, List<VersionOneWorkItem>> iterations = getStoriesPerTimebox(context, scopeId, includeClosedSprints, includeStoriesInNoSprint);
 
@@ -181,9 +181,9 @@ public class VersionOneService {
         }
 
         return timeboxes;
-    }
+    }*/
 
-    public Map<String, Map<String, Long>> getTimeSheet(String startDate, String endDate, String scopeId,
+    /*public Map<String, Map<String, Long>> getTimeSheet(String startDate, String endDate, String scopeId,
             String username)
     {
         List<VersionOneActualForTimesheet> list = getActuals(startDate, endDate, scopeId, username);
@@ -208,9 +208,9 @@ public class VersionOneService {
         }
 
         return map;
-    }
+    }*/
 
-    private List<VersionOneActualForTimesheet> getActuals(String startDate, String endDate, String scopeId,
+    /*private List<VersionOneActualForTimesheet> getActuals(String startDate, String endDate, String scopeId,
             String username)
     {
         List<VersionOneActualForTimesheet> list = new ArrayList<>();
@@ -242,13 +242,13 @@ public class VersionOneService {
         }
 
         return list;
-    }
+    }*/
 
     private String encodeUrl(String url) {
-        return url.replaceAll(" ", "%20").replaceAll(">", "%3E").replaceAll("<", "%3C").replaceAll("@", "%40");
+        return url.replace(" ", "%20").replace(">", "%3E").replace("<", "%3C").replace("@", "%40").replace("|", "%7C");
     }
 
-    private Map<VersionOneTimebox, List<VersionOneWorkItem>> getStoriesPerTimebox(VersionOneWorkPlanIntegration.TaskCreationContext context, String scopeId, boolean includeClosedSprints, boolean includeStoriesInNoSprint) {
+    /*private Map<VersionOneTimebox, List<VersionOneWorkItem>> getStoriesPerTimebox(VersionOneWorkPlanIntegration.TaskCreationContext context, String scopeId, boolean includeClosedSprints, boolean includeStoriesInNoSprint) {
         Map<VersionOneTimebox, List<VersionOneWorkItem>> storiesPerTimebox = new HashMap<>();
         String getString = baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + "%22"+scopeId+"%22";
         if (!includeClosedSprints) {
@@ -324,20 +324,20 @@ public class VersionOneService {
 
 
         // Following corrections are here just in case query string isn't working properly.
-        /*if (!includeStoriesInNoSprint) {
-            storiesPerTimebox.remove(null);
-        }
-        if (!includeClosedSprints) {
-            List<VersionOneTimebox> timeboxes = new ArrayList<>(storiesPerTimebox.keySet());
-            for (VersionOneTimebox timebox : timeboxes) {
-                if (VersionOneConstants.TIMEBOX_STATUS_CLOSED.equalsIgnoreCase(timebox.getStateCode())) {
-                    storiesPerTimebox.remove(timebox);
-                }
-            }
-        }*/
+//        if (!includeStoriesInNoSprint) {
+//            storiesPerTimebox.remove(null);
+//        }
+//        if (!includeClosedSprints) {
+//            List<VersionOneTimebox> timeboxes = new ArrayList<>(storiesPerTimebox.keySet());
+//            for (VersionOneTimebox timebox : timeboxes) {
+//                if (VersionOneConstants.TIMEBOX_STATUS_CLOSED.equalsIgnoreCase(timebox.getStateCode())) {
+//                    storiesPerTimebox.remove(timebox);
+//                }
+//            }
+//        }
 
         return storiesPerTimebox;
-    }
+    }*/
 
     public static VersionOneService fromValueSet(ValueSet values) {
 
@@ -360,7 +360,7 @@ public class VersionOneService {
         return service;
     }
 
-    public List<VersionOneRequest> importRequestEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String requestTypeName, String scopeId, ValueSet values) {
+    /*public List<VersionOneRequest> importRequestEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String requestTypeName, String scopeId, ValueSet values) {
         List<VersionOneRequest> requests = new ArrayList<>();
         String getString = baseUri + VersionOneConstants.REQUESTS_SUFFIX + "%22"+ requestTypeName + "%22;Scope=%22"+scopeId+"%22";
         ClientResponse response = wrapper.sendGet(getString);
@@ -396,9 +396,9 @@ public class VersionOneService {
         }
 
         return requests;
-    }
+    }*/
 
-    public List<VersionOneEpic> importEpicEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String epicTypesName, String scopeId, ValueSet values) {
+    /*public List<VersionOneEpic> importEpicEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String epicTypesName, String scopeId, ValueSet values) {
         List<VersionOneEpic> epics = new ArrayList<>();
         String getString = baseUri + VersionOneConstants.EPICS_SUFFIX + "%22"+ epicTypesName + "%22;Scope=%22"+scopeId+"%22";
         ClientResponse response = wrapper.sendGet(getString);
@@ -435,20 +435,22 @@ public class VersionOneService {
         }
 
         return epics;
-    }
+    }*/
 
-    public List<VersionOneEpic> importEpicFeaturesEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String wbsID, List<String> subTypesNames, ValueSet values) {
+    public List<VersionOneEpic> importEpicFeaturesEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String wbsID, ValueSet values) {
+
         List<VersionOneEpic> epics = new ArrayList<>();
-        String emailField = EMAIL_FIELD.replace("%WBSid%", wbsID);
-        String getString =  VersionOneConstants.EPICS_FEATURES_PATH_AND_PARAMS;
+        String emailField = values.get(KEY_AGILITY_EMAIL_FIELD);
+        if (StringUtils.isNullOrEmptyOrBlank(emailField)) { emailField =  DEFAULT_EMAIL_FIELD; }
+        emailField = emailField.replace("%WBS_ID%", wbsID);
 
-        getString = getString.replace("%WBSid%", wbsID);
-        getString = getString.replace("%EmailField%", emailField);
-        getString = getString.replace("%SubsAssetTypeFilter%", subTypesNames.stream().map((st) -> "Subs.AssetType='"+st+"'").collect(Collectors.joining("|")));
-        getString = getString.replace(" ", "%20");
-        getString = getString.replace("|", "%7C");
+        String getString =  values.get(KEY_AGILITY_REST_URL);
+        if (StringUtils.isNullOrEmptyOrBlank(getString)) {getString =  DEFAULT_AGILITY_REST_URL;}
+        getString = getString.replace("%WBS_ID%", wbsID);
 
-        getString = baseUri + VersionOneConstants.API_VERSION_API_DATA_ROOT + getString;
+        getString = encodeUrl(getString);
+
+        getString = baseUri + getString;
 
         ClientResponse response = wrapper.sendGet(getString);
 
@@ -470,11 +472,13 @@ public class VersionOneService {
                 String id = asset.getString("id");
                 String statusName = attributes.getJSONObject("Status.Name").getString("value");
                 String createDate = attributes.getJSONObject("CreateDate").getString("value");
+                String number = attributes.getJSONObject("Number").getString("value");
+
 
                 String plannedStart = attributes.has("PlannedStart") ? attributes.getJSONObject("PlannedStart").getString("value") : null;
                 String plannedEnd = attributes.has("PlannedEnd") ? attributes.getJSONObject("PlannedEnd").getString("value") : null;
 
-                VersionOneEpic epic = new VersionOneEpic(id, name, statusName, createDate, plannedStart, plannedEnd, taskContext);
+                VersionOneEpic epic = new VersionOneEpic(id, number, name, statusName, createDate, plannedStart, plannedEnd, taskContext);
                 epic.setOwnersNames(attributes.getJSONObject(emailField));
                 epics.add(epic);
             }

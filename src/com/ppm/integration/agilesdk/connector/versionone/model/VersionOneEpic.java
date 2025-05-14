@@ -19,8 +19,11 @@ public class VersionOneEpic extends VersionOneWorkItem {
 
     private String plannedEnd;
 
-    public VersionOneEpic(String storyId, String storyName, String statusName, String createDate, String plannedStart, String plannedEnd, VersionOneWorkPlanIntegration.TaskCreationContext context) {
+    private String number;
+
+    public VersionOneEpic(String storyId, String storyNumber, String storyName, String statusName, String createDate, String plannedStart, String plannedEnd, VersionOneWorkPlanIntegration.TaskCreationContext context) {
         super(storyId, storyName, statusName, createDate, context);
+        this.number = storyNumber;
         this.plannedStart =  plannedStart;
         this.plannedEnd =  plannedEnd;
     }
@@ -39,6 +42,11 @@ public class VersionOneEpic extends VersionOneWorkItem {
     public List<ExternalTaskActuals> getActuals() {
         // Actuals with resources are included in the children tasks.
         return new ArrayList<>();
+    }
+
+    @Override
+    public String getName() {
+        return this.number + ": " + this.name;
     }
 
     @Override

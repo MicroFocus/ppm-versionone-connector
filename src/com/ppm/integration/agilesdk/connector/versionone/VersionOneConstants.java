@@ -47,10 +47,9 @@ public interface VersionOneConstants {
             "Epic?Accept=application/json&sort=PlannedStart&sel=Name,Owners.Name,Status.Name,CreateDate,PlannedStart,PlannedEnd&where=Category.Name=";
 
 
-    String EMAIL_FIELD = "Subs[ParentMeAndUp.TaggedWith='%WBSid%'].Owners.Email";
-    String EPICS_FEATURES_PATH_AND_PARAMS =
-            "Epic?Accept=application/json&sort=PlannedStart&sel=Number,Name,Status.Name,CreateDate,PlannedStart,PlannedEnd,%EmailField%&where=(Category.Name='Sub - Feature'|Category.Name='Feature');(%SubsAssetTypeFilter%);Subs.ParentMeAndUp.TaggedWith='%WBSid%'";
+    String DEFAULT_EMAIL_FIELD = "Subs[ParentMeAndUp.TaggedWith='%WBS_ID%'].Owners.Email";
 
+    String DEFAULT_AGILITY_REST_URL = "/rest-1.v1/data/Epic?sel=Number,Name,PlannedStart,PlannedEnd,Status.Name,CreateDate,Subs[ParentMeAndUp.TaggedWith='%WBS_ID%'].Owners.Email&where=(Category.Name='Sub - Feature'|Category.Name='Feature');(Subs.AssetType='Story'|Subs.AssetType='Defect');Subs.ParentMeAndUp.TaggedWith='%WBS_ID%'";
 
     String STORIES_WITH_TIMEBOX_SUFFIX = API_VERSION_API_DATA_ROOT
             + "Story?Accept=application/json&sort=Timebox.BeginDate&sel=Name,Owners.Name,Status.Name,Timebox.Name,Timebox.State.Code,Timebox.BeginDate,Timebox.EndDate,Timebox.ID,CreateDate,Children.Actuals.Value.@Sum,Children.ToDo.@Sum,Children.DetailEstimate.@Sum&where=Scope=";
@@ -60,9 +59,9 @@ public interface VersionOneConstants {
 
     String TIMEBOX_STATUS_CLOSED = "CLSD";
 
-    String KEY_PICK_RESOURCES_FROM_THESE_SUB_TYPES = "PICK_RESOURCES_FROM_THESE_SUB_TYPES";
+    String KEY_AGILITY_REST_URL = "agilityRestUrl";
 
-    String KEY_AGILITY_ID_FIELD_NAME = "AGILITY_ID_FIELD_NAME";
+    String KEY_AGILITY_EMAIL_FIELD = "agilityEmailField";
 
     String KEY_PPM_REQUEST_FIELD_TYPE = "PPM_REQUEST_FIELD_TYPE";
 
