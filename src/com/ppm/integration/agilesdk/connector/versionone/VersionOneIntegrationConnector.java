@@ -11,8 +11,7 @@ import com.ppm.integration.agilesdk.provider.LocalizationProvider;
 import com.ppm.integration.agilesdk.provider.Providers;
 import com.ppm.integration.agilesdk.ui.*;
 
-import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants.DEFAULT_AGILITY_REST_URL;
-import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants.DEFAULT_EMAIL_FIELD;
+import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants.*;
 
 /**
  * @author baijuy The connector provides the integration for ppm with
@@ -70,6 +69,8 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
                 new LabelText("", "AGILITY_REST_DESCRIPTION", "block", false),
                 new PlainText(VersionOneConstants.KEY_AGILITY_REST_URL, "AGILITY_REST_URL", DEFAULT_AGILITY_REST_URL, true),
                 new PlainText(VersionOneConstants.KEY_AGILITY_EMAIL_FIELD, "AGILITY_EMAIL_FIELD", DEFAULT_EMAIL_FIELD, true),
+                new PlainText(VersionOneConstants.KEY_AGILITY_FIRST_CRITERIA_FIELD, "AGILITY_FIRST_CRITERIA_FIELD", DEFAULT_FIRST_CRITERIA_FIELD, false),
+                new PlainText(VersionOneConstants.KEY_AGILITY_SECOND_CRITERIA_FIELD, "AGILITY_SECOND_CRITERIA_FIELD", DEFAULT_SECOND_CRITERIA_FIELD, false),
                 new SelectList(VersionOneConstants.KEY_PPM_REQUEST_FIELD_TYPE,"PPM_REQUEST_FIELD_TYPE",VersionOneConstants.PPM_REQUEST_FIELD_TYPE_REQUEST_HEADER,true)
                         .addLevel(VersionOneConstants.KEY_PPM_REQUEST_FIELD_TYPE, "PPM_REQUEST_FIELD_TYPE")
                         .addOption(new SelectList.Option(VersionOneConstants.PPM_REQUEST_FIELD_TYPE_REQUEST_HEADER,"REQUEST_FIELD_TYPE_REQUEST_HEADER"))

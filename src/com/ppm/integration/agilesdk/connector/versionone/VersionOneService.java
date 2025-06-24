@@ -475,11 +475,36 @@ public class VersionOneService {
                 String number = attributes.getJSONObject("Number").getString("value");
 
 
+
+
                 String plannedStart = attributes.has("PlannedStart") ? attributes.getJSONObject("PlannedStart").getString("value") : null;
                 String plannedEnd = attributes.has("PlannedEnd") ? attributes.getJSONObject("PlannedEnd").getString("value") : null;
 
                 VersionOneEpic epic = new VersionOneEpic(id, number, name, statusName, createDate, plannedStart, plannedEnd, taskContext);
                 epic.setOwnersNames(attributes.getJSONObject(emailField));
+
+                // Setting first Criteria & Second Criteria for custom logic of sub-tasks creation
+                String firstCriteriaField = values.get(KEY_AGILITY_FIRST_CRITERIA_FIELD);
+                if (!StringUtils.isNullOrEmptyOrBlank(firstCriteriaField)) {
+                    JSONObject obj = attributes.getJSONObject(firstCriteriaField);
+                    if (obj != null && obj.has("value")) {
+                        String value = obj.getString("value");
+                        if (value != null) {
+                            epic.setFirstCriteria(value);
+                        }
+                    }
+                }
+                String secondCriteriaField = values.get(KEY_AGILITY_SECOND_CRITERIA_FIELD);
+                if (!StringUtils.isNullOrEmptyOrBlank(secondCriteriaField)) {
+                    JSONObject obj = attributes.getJSONObject(secondCriteriaField);
+                    if (obj != null && obj.has("value")) {
+                        String value = obj.getString("value");
+                        if (value != null) {
+                            epic.setSecondCriteria(value);
+                        }
+                    }
+                }
+
                 epics.add(epic);
             }
 
