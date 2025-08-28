@@ -443,19 +443,17 @@ public class VersionOneService {
         if (StringUtils.isNullOrEmptyOrBlank(emailField)) { emailField =  DEFAULT_EMAIL_FIELD; }
         emailField = emailField.replace("%WBS_ID%", wbsID);
 
-        String getString =  values.get(KEY_AGILITY_REST_URL);
-        if (StringUtils.isNullOrEmptyOrBlank(getString)) {getString =  DEFAULT_AGILITY_REST_URL;}
-        getString = getString.replace("%WBS_ID%", wbsID);
-
-        getString = getString.split("&where")[0];
+        String agilityUrl = values.get(KEY_AGILITY_REST_URL);
+        if (StringUtils.isNullOrEmptyOrBlank(agilityUrl)) {
+            agilityUrl = DEFAULT_AGILITY_REST_URL;
+        }
+        agilityUrl = agilityUrl.replace("%WBS_ID%", wbsID);
+        StringBuilder reqUrl = new StringBuilder(agilityUrl.split("&where")[0]);
         String joinedIds = String.join(",", taskIds.stream().map(id -> "%27" + id + "%27") .toArray(String[]::new));
-        getString = getString + (String.format("&where=(Number=%s)",joinedIds));
+        reqUrl.append("&where=(Number=").append(joinedIds).append(")");
+        String finalUrl = baseUri + encodeUrl(reqUrl.toString());
 
-        getString = encodeUrl(getString);
-
-        getString = baseUri + getString;
-
-        ClientResponse response = wrapper.sendGet(getString);
+        ClientResponse response = wrapper.sendGet(finalUrl);
         String jsonStr = response.getEntity(String.class);
 
         if (logger.isDebugEnabled()) {
