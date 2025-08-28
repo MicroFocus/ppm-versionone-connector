@@ -436,10 +436,43 @@ public class VersionOneService {
 
         return epics;
     }*/
+    public List<VersionOneEpic> importEpicFeaturesEntitiesByIds(List<String> taskIds,
+                                             VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String wbsID, ValueSet values) {
 
+        String emailField = values.get(KEY_AGILITY_EMAIL_FIELD);
+        if (StringUtils.isNullOrEmptyOrBlank(emailField)) { emailField =  DEFAULT_EMAIL_FIELD; }
+        emailField = emailField.replace("%WBS_ID%", wbsID);
+
+        String getString =  values.get(KEY_AGILITY_REST_URL);
+        if (StringUtils.isNullOrEmptyOrBlank(getString)) {getString =  DEFAULT_AGILITY_REST_URL;}
+        getString = getString.replace("%WBS_ID%", wbsID);
+
+        getString = getString.split("&where")[0];
+        String joinedIds = String.join(",", taskIds.stream().map(id -> "%27" + id + "%27") .toArray(String[]::new));
+        getString = getString + (String.format("&where=(Number=%s)",joinedIds));
+
+        getString = encodeUrl(getString);
+
+        getString = baseUri + getString;
+
+        ClientResponse response = wrapper.sendGet(getString);
+        String jsonStr = response.getEntity(String.class);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("<=== Received JSon: "+jsonStr);
+        }
+
+        try {
+
+            return prepareEpics(taskContext, values, jsonStr, emailField);
+
+        } catch (JSONException e) {
+            logger.error("", e);
+        }
+
+        return new ArrayList<>();
+    }
     public List<VersionOneEpic> importEpicFeaturesEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String wbsID, ValueSet values) {
-
-        List<VersionOneEpic> epics = new ArrayList<>();
         String emailField = values.get(KEY_AGILITY_EMAIL_FIELD);
         if (StringUtils.isNullOrEmptyOrBlank(emailField)) { emailField =  DEFAULT_EMAIL_FIELD; }
         emailField = emailField.replace("%WBS_ID%", wbsID);
@@ -462,56 +495,58 @@ public class VersionOneService {
 
         try {
 
-            JSONObject jsonObj = new JSONObject(jsonStr);
-
-            JSONArray jsonAssets = jsonObj.getJSONArray("Assets");
-            for (int i = 0; i < jsonAssets.length(); i++) {
-                JSONObject asset = jsonAssets.getJSONObject(i);
-                JSONObject attributes = asset.getJSONObject("Attributes");
-                String name = attributes.getJSONObject("Name").getString("value");
-                String id = asset.getString("id");
-                String statusName = attributes.getJSONObject("Status.Name").getString("value");
-                String createDate = attributes.getJSONObject("CreateDate").getString("value");
-                String number = attributes.getJSONObject("Number").getString("value");
-
-
-
-
-                String plannedStart = attributes.has("PlannedStart") ? attributes.getJSONObject("PlannedStart").getString("value") : null;
-                String plannedEnd = attributes.has("PlannedEnd") ? attributes.getJSONObject("PlannedEnd").getString("value") : null;
-
-                VersionOneEpic epic = new VersionOneEpic(id, number, name, statusName, createDate, plannedStart, plannedEnd, taskContext);
-                epic.setOwnersNames(attributes.getJSONObject(emailField));
-
-                // Setting first Criteria & Second Criteria for custom logic of sub-tasks creation
-                String firstCriteriaField = values.get(KEY_AGILITY_FIRST_CRITERIA_FIELD);
-                if (!StringUtils.isNullOrEmptyOrBlank(firstCriteriaField)) {
-                    JSONObject obj = attributes.getJSONObject(firstCriteriaField);
-                    if (obj != null && obj.has("value")) {
-                        String value = obj.getString("value");
-                        if (value != null) {
-                            epic.setFirstCriteria(value);
-                        }
-                    }
-                }
-                String secondCriteriaField = values.get(KEY_AGILITY_SECOND_CRITERIA_FIELD);
-                if (!StringUtils.isNullOrEmptyOrBlank(secondCriteriaField)) {
-                    JSONObject obj = attributes.getJSONObject(secondCriteriaField);
-                    if (obj != null && obj.has("value")) {
-                        String value = obj.getString("value");
-                        if (value != null) {
-                            epic.setSecondCriteria(value);
-                        }
-                    }
-                }
-
-                epics.add(epic);
-            }
+            return prepareEpics(taskContext, values, jsonStr, emailField);
 
         } catch (JSONException e) {
             logger.error("", e);
         }
 
+        return new ArrayList<>();
+    }
+
+    private static List<VersionOneEpic> prepareEpics(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, ValueSet values, String jsonStr, String emailField) {
+        JSONObject jsonObj = new JSONObject(jsonStr);
+        List<VersionOneEpic> epics = new ArrayList<>();
+        JSONArray jsonAssets = jsonObj.getJSONArray("Assets");
+        for (int i = 0; i < jsonAssets.length(); i++) {
+            JSONObject asset = jsonAssets.getJSONObject(i);
+            JSONObject attributes = asset.getJSONObject("Attributes");
+            String name = attributes.getJSONObject("Name").getString("value");
+            String id = asset.getString("id");
+            String statusName = attributes.getJSONObject("Status.Name").getString("value");
+            String createDate = attributes.getJSONObject("CreateDate").getString("value");
+            String number = attributes.getJSONObject("Number").getString("value");
+
+            String plannedStart = attributes.has("PlannedStart") ? attributes.getJSONObject("PlannedStart").getString("value") : null;
+            String plannedEnd = attributes.has("PlannedEnd") ? attributes.getJSONObject("PlannedEnd").getString("value") : null;
+
+            VersionOneEpic epic = new VersionOneEpic(id, number, name, statusName, createDate, plannedStart, plannedEnd, taskContext);
+            epic.setOwnersNames(attributes.getJSONObject(emailField));
+
+            // Setting first Criteria & Second Criteria for custom logic of sub-tasks creation
+            String firstCriteriaField = values.get(KEY_AGILITY_FIRST_CRITERIA_FIELD);
+            if (!StringUtils.isNullOrEmptyOrBlank(firstCriteriaField)) {
+                JSONObject obj = attributes.getJSONObject(firstCriteriaField);
+                if (obj != null && obj.has("value")) {
+                    String value = obj.getString("value");
+                    if (value != null) {
+                        epic.setFirstCriteria(value);
+                    }
+                }
+            }
+            String secondCriteriaField = values.get(KEY_AGILITY_SECOND_CRITERIA_FIELD);
+            if (!StringUtils.isNullOrEmptyOrBlank(secondCriteriaField)) {
+                JSONObject obj = attributes.getJSONObject(secondCriteriaField);
+                if (obj != null && obj.has("value")) {
+                    String value = obj.getString("value");
+                    if (value != null) {
+                        epic.setSecondCriteria(value);
+                    }
+                }
+            }
+
+            epics.add(epic);
+        }
         return epics;
     }
 }
