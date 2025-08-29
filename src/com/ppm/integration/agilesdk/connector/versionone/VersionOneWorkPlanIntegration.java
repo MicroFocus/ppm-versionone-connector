@@ -293,11 +293,26 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
                 userProvider = Providers.getUserProvider(VersionOneIntegrationConnector.class);
             }
             User u = userProvider.getByUsername(owner);
-            if (u == null) {
-                u = userProvider.getByEmail(owner);
+            if(u != null){
+                return u.getUserId();
             }
-            return u == null ? null : u.getUserId();
+            return getByEmail(owner);
+
         }
     }
 
+        private Long getByEmail(String email) {
+            HibernateTemplate wp = new HibernateTemplate() {
+
+                @Override
+                public void run() throws Exception {
+                    NativeQuery query = getSession().createNativeQuery("select USER_ID as userId from KNTA_USERS where LOWER(email_address) = :email ORDER BY END_DATE desc  FETCH FIRST 1 ROWS ONLY");
+                    query.setParameter("email", email);
+                    query.addScalar("userId", StandardBasicTypes.LONG);
+                    setResult(query.uniqueResult());
+                }
+            };
+            wp.doRun();
+            return (Long) wp.getResult();
+        }
 }
