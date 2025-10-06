@@ -139,10 +139,6 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
     private List<VersionOneEpic> importEpicFeaturesFromPpmTasks(List<VersionOneEpic> epics,final Long taskId,
                                                              VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String wbsID, ValueSet values){
-        if(epics==null || epics.isEmpty()){
-            return null;
-        }
-
         List<String> agilityTasks = new ArrayList<>();
         for(VersionOneEpic eachEpic : epics){
             // here the name is associated with the unique task numbers
@@ -151,7 +147,7 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
         HibernateTemplate wp = new HibernateTemplate() {
             @Override
             public void run() throws Exception {
-                NativeQuery query = getSession().createNativeQuery("SELECT NAME FROM wp_task_info WHERE task_info_id IN (SELECT TASK_ACTUALS_ID FROM wp_tasks WHERE WP_TASKS.PARENT_TASK_ID = :taskId)");
+                NativeQuery query = getSession().createNativeQuery("SELECT NAME FROM wp_task_info WHERE wp_task_info.OWNER_TASK_ID IN (SELECT TASK_ID FROM wp_tasks WHERE WP_TASKS.PARENT_TASK_ID = :taskId)");
                 query.setParameter("taskId", taskId);
                 query.addScalar("NAME", StandardBasicTypes.STRING);
                 setResult(query.list());
