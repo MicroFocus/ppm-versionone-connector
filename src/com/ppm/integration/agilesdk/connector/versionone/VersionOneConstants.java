@@ -73,6 +73,8 @@ public interface VersionOneConstants {
 
     String KEY_PPM_REQUEST_FIELD_TYPE = "PPM_REQUEST_FIELD_TYPE";
 
+    String KEY_PPM_RESTRICT_TASK_DELETE = "PPM_RESTRICT_TASK_DELETE";
+
     String PPM_REQUEST_FIELD_TYPE_REQUEST_HEADER = "reqFieldRequestHeader";
 
     String PPM_REQUEST_FIELD_TYPE_REQUEST_DETAILS = "reqFieldRequestDetails";
