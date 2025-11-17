@@ -109,6 +109,7 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
     @Override
     public ExternalWorkPlan getExternalWorkPlan(WorkPlanIntegrationContext context, ValueSet values) {
 
+        Long taskId = context.currentTask().getId();
         String wbsID = getWBSId(context, values);
 
         configureService(values);
@@ -123,12 +124,64 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
         final List<VersionOneEpic> epics = service.importEpicFeaturesEntities(taskContext, wbsID, values);
         externalTasks.addAll(epics);
 
+        List<VersionOneEpic> newEpics = importEpicFeaturesFromPpmTasks(epics,taskId,taskContext,wbsID,values );
+        if(newEpics !=null && !newEpics.isEmpty()){
+            externalTasks.addAll(newEpics);
+        }
+
         return new ExternalWorkPlan() {
             @Override
             public List<ExternalTask> getRootTasks() {
                 return externalTasks;
             }
         };
+    }
+
+    private List<VersionOneEpic> importEpicFeaturesFromPpmTasks(List<VersionOneEpic> epics,final Long taskId,
+                                                             VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String wbsID, ValueSet values){
+        List<String> agilityTasks = new ArrayList<>();
+        for(VersionOneEpic eachEpic : epics){
+            // here the name is associated with the unique task numbers
+            agilityTasks.add(eachEpic.getName());
+        }
+        HibernateTemplate wp = new HibernateTemplate() {
+            @Override
+            public void run() throws Exception {
+                NativeQuery query = getSession().createNativeQuery("SELECT NAME FROM wp_task_info WHERE wp_task_info.OWNER_TASK_ID IN (SELECT TASK_ID FROM wp_tasks WHERE WP_TASKS.PARENT_TASK_ID = :taskId)");
+                query.setParameter("taskId", taskId);
+                query.addScalar("NAME", StandardBasicTypes.STRING);
+                setResult(query.list());
+            }
+        };
+        wp.doRun();
+        List<String> ppmChildTasks = (List<String>)wp.getResult();
+        if(ppmChildTasks == null || ppmChildTasks.isEmpty()){
+            return null;
+        }
+        List<String> missedTasks = new ArrayList<>();
+        for(String eachChildTask : ppmChildTasks){
+            if(!agilityTasks.contains(eachChildTask)
+                && eachChildTask.contains(":")){
+                missedTasks.add(eachChildTask.split(":")[0]);
+            }
+        }
+        if(missedTasks==null || missedTasks.isEmpty()){
+            return null;
+        }
+        List<VersionOneEpic> allTasks = new ArrayList<>();
+        int batchSize = 100;
+        for (int i = 0; i < missedTasks.size(); i += batchSize) {
+            List<String> batch = missedTasks.subList(i, Math.min(i + batchSize, missedTasks.size()));
+            List<VersionOneEpic> batchResult = service.importEpicFeaturesEntitiesByIds(batch, taskContext, wbsID, values);
+            if(batchResult!=null && !batchResult.isEmpty()){
+                for(VersionOneEpic eachEpic : batchResult){
+                    // to mark requests completed which are not in the part of first sync
+                    eachEpic.setStatusName("Done");
+                }
+                allTasks.addAll(batchResult);
+            }
+        }
+        return allTasks;
     }
 
     private ExternalTask getWrappingTask(String wrappingTaskName, List<? extends ExternalTask> tasks) {
@@ -236,11 +289,26 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
                 userProvider = Providers.getUserProvider(VersionOneIntegrationConnector.class);
             }
             User u = userProvider.getByUsername(owner);
-            if (u == null) {
-                u = userProvider.getByEmail(owner);
+            if(u != null){
+                return u.getUserId();
             }
-            return u == null ? null : u.getUserId();
+            return getByEmail(owner);
+
         }
     }
 
+        private Long getByEmail(String email) {
+            HibernateTemplate wp = new HibernateTemplate() {
+
+                @Override
+                public void run() throws Exception {
+                    NativeQuery query = getSession().createNativeQuery("select USER_ID as userId from KNTA_USERS where LOWER(email_address) = :email ORDER BY END_DATE desc  FETCH FIRST 1 ROWS ONLY");
+                    query.setParameter("email", email);
+                    query.addScalar("userId", StandardBasicTypes.LONG);
+                    setResult(query.uniqueResult());
+                }
+            };
+            wp.doRun();
+            return (Long) wp.getResult();
+        }
 }
