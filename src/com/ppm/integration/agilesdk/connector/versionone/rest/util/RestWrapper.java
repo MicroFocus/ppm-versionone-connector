@@ -3,7 +3,8 @@ package com.ppm.integration.agilesdk.connector.versionone.rest.util;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
+import com.kintana.core.logging.LogManager;
+import com.kintana.core.logging.Logger;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
@@ -13,7 +14,7 @@ import com.ppm.integration.agilesdk.connector.versionone.rest.util.exception.Res
 public class RestWrapper {
     private RestClient restClient;
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(RestWrapper.class);
 
     private IRestConfig config;
 
