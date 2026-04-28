@@ -82,6 +82,7 @@ public class VersionOneIntegrationConnector extends IntegrationConnector {
                 getColumnSelect(),
                 getBatchSelect(),
                 new LineBreaker(),
+                new CheckBox(VersionOneConstants.KEY_PPM_RESTRICT_TASK_DELETE, "PPM_RESTRICT_TASK_DELETE", false),
         });
     }
 

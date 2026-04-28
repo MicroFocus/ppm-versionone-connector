@@ -19,15 +19,22 @@ public class DeltaSubTaskCreationLogic {
         switch(fundingType) {
             case "SaaS":
                 childrenNames.add("SaaS");
+                break;
+            case "Exploration":
                 childrenNames.add("OP");
                 break;
             default: // CapEx or Opex or empty
                 switch (fundingLevel) {
+                    case "Pillars / Enablers":
+                    case "Mandates":
+                    case "CBF - Critical Business Foundations":
+                        childrenNames.add("CAP");
+                        break;
                     case "BAU (OpEx)":
-                        childrenNames.add("OP"); // Opex Only
+                    case "CBF - Fix Broken Experiences":
+                        childrenNames.add("OP");
                         break;
                     default:
-                        childrenNames.add("CAP");
                         childrenNames.add("OP");
                         break;
                 }
