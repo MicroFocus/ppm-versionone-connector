@@ -14,7 +14,7 @@ import com.ppm.integration.agilesdk.connector.versionone.rest.util.VersionOneRes
 import com.ppm.integration.agilesdk.provider.Providers;
 import com.kintana.core.logging.LogManager;
 import com.kintana.core.logging.Logger;
-import org.apache.wink.client.ClientResponse;
+import com.ppm.integration.agilesdk.connector.versionone.rest.util.ClientResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

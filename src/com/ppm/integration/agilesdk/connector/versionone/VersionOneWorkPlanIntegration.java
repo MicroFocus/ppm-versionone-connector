@@ -12,7 +12,6 @@ import com.ppm.integration.agilesdk.provider.UserProvider;
 import com.ppm.integration.agilesdk.ui.*;
 import com.kintana.core.logging.LogManager;
 import com.kintana.core.logging.Logger;
-import org.apache.wink.client.ClientRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ppm.integration.agilesdk.ValueSet;
@@ -68,7 +67,7 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
                                 List<VersionOneScope> list = new ArrayList<>();
                                 try {
                                     list = service.getProjectsForCurrentPpmUser(values);
-                                } catch (ClientRuntimeException | RestRequestException e) {
+                                } catch (RestRequestException e) {
                                     logger.error("VersionOne Workplan", e);
                                     new VersionOneConnectivityExceptionHandler().uncaughtException(
                                             Thread.currentThread(), e, VersionOneWorkPlanIntegration.class);

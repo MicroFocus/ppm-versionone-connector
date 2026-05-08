@@ -1,18 +1,25 @@
 
 package com.ppm.integration.agilesdk.connector.versionone.rest.util;
 
-import javax.ws.rs.core.MediaType;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
 import com.kintana.core.logging.LogManager;
 import com.kintana.core.logging.Logger;
-import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
 
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.exception.RestRequestException;
 
 public class RestWrapper {
-    private RestClient restClient;
+    private RestTemplate restTemplate;
 
     private final Logger logger = LogManager.getLogger(RestWrapper.class);
 
@@ -20,38 +27,55 @@ public class RestWrapper {
 
     public RestWrapper(IRestConfig config) {
         this.config = config;
-        restClient = createRestClient(config);
+        restTemplate = createRestTemplate();
     }
 
+    public RestTemplate createRestTemplate() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        if (config.getProxyHost() != null && !config.getProxyHost().isEmpty()
+                && config.getProxyPort() != null && !config.getProxyPort().isEmpty()) {
+            Proxy proxy = new Proxy(Proxy.Type.HTTP,
+                    new InetSocketAddress(config.getProxyHost(), Integer.parseInt(config.getProxyPort())));
+            requestFactory.setProxy(proxy);
+        }
 
-    public RestClient createRestClient(IRestConfig config) {
-        restClient = new RestClient(config.getClientConfig());
-        return restClient;
+        RestTemplate template = new RestTemplate(requestFactory);
+        template.setErrorHandler(new DefaultResponseErrorHandler() {
+            @Override
+            public boolean hasError(org.springframework.http.HttpStatus statusCode) {
+                return false;
+            }
+        });
+        return template;
     }
 
-    private Resource getResource(String uri) {
-        Resource resource = restClient.resource(uri).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).header("Authorization", config.getAuthorizationHeader());
-        return resource;
+    private HttpEntity<?> getRequestHeaders(String uri) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(java.util.Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.set("Authorization", config.getAuthorizationHeader());
+        return new HttpEntity<>(headers);
     }
 
     public ClientResponse sendGet(String uri) {
         if (logger.isDebugEnabled()) {
-            logger.debug("===> GET "+uri);
+            logger.debug("===> GET " + uri);
         }
-        Resource resource = this.getResource(uri);
-        ClientResponse response = resource.get();
-        int statusCode = response.getStatusCode();
+
+        HttpEntity<?> requestEntity = getRequestHeaders(uri);
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
+        
+        int statusCode = response.getStatusCodeValue();
         if (statusCode != 200) {
             if (logger.isDebugEnabled()) {
-                logger.debug("###> ERROR, not getting HTTP 200 Response. Status code: "+statusCode + ", response message: "+response.getMessage());
+                logger.debug("###> ERROR, not getting HTTP 200 Response. Status code: " + statusCode + ", response message: " + response.getStatusCode().getReasonPhrase());
             }
-            throw new RestRequestException(statusCode + "", response.getMessage());
+            throw new RestRequestException(statusCode + "", response.getStatusCode().getReasonPhrase());
         }
 
         if (logger.isDebugEnabled()) {
             logger.debug("<=== HTTP 200");
         }
-        return response;
+        return new ClientResponse(response);
     }
 }
