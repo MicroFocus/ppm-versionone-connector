@@ -1,5 +1,6 @@
 package com.ppm.integration.agilesdk.connector.versionone.rest.util;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -35,7 +36,9 @@ public class ClientResponse {
      * Returns HTTP reason phrase (mimics Wink ClientResponse.getMessage()).
      */
     public String getMessage() {
-        return responseEntity.getStatusCode().getReasonPhrase();
+
+        HttpStatus status = HttpStatus.resolve(getStatusCode());
+        return status != null ? status.getReasonPhrase() : String.valueOf(getStatusCode());
     }
 
     /**

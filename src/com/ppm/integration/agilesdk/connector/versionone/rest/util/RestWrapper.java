@@ -6,6 +6,8 @@ import java.net.Proxy;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,11 +44,16 @@ public class RestWrapper {
         RestTemplate template = new RestTemplate(requestFactory);
         template.setErrorHandler(new DefaultResponseErrorHandler() {
             @Override
-            public boolean hasError(org.springframework.http.HttpStatus statusCode) {
+            public boolean hasError(HttpStatusCode statusCode) {
                 return false;
             }
         });
         return template;
+    }
+
+    private String getReasonPhrase(HttpStatusCode statusCode) {
+        HttpStatus httpStatus = HttpStatus.resolve(statusCode.value());
+        return httpStatus != null ? httpStatus.getReasonPhrase() : String.valueOf(statusCode.value());
     }
 
     private HttpEntity<?> getRequestHeaders(String uri) {
@@ -67,10 +74,11 @@ public class RestWrapper {
         
         int statusCode = response.getStatusCodeValue();
         if (statusCode != 200) {
+            String reasonPhrase = getReasonPhrase(response.getStatusCode());
             if (logger.isDebugEnabled()) {
-                logger.debug("###> ERROR, not getting HTTP 200 Response. Status code: " + statusCode + ", response message: " + response.getStatusCode().getReasonPhrase());
+                logger.debug("###> ERROR, not getting HTTP 200 Response. Status code: " + statusCode + ", response message: " + reasonPhrase);
             }
-            throw new RestRequestException(statusCode + "", response.getStatusCode().getReasonPhrase());
+            throw new RestRequestException(statusCode + "", reasonPhrase);
         }
 
         if (logger.isDebugEnabled()) {
