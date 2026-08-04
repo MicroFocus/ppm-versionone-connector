@@ -14,7 +14,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.kintana.core.logging.LogManager;
 import com.kintana.core.logging.Logger;
-import org.apache.wink.client.ClientRuntimeException;
 
 import com.ppm.integration.agilesdk.ValueSet;
 import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneScope;
@@ -89,13 +88,13 @@ public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
                         configureService(values);
 
                         List<VersionOneScope> list = new ArrayList<>();
-                        try {
-                            list = service.getProjectsForCurrentPpmUser(values);
-                        } catch (ClientRuntimeException | RestRequestException e) {
-                            logger.error("VersionOne TimeSheet", e);
-                            new VersionOneConnectivityExceptionHandler().uncaughtException(Thread.currentThread(), e,
-                                    VersionOneTimeSheetIntegration.class);
-                        } catch (RuntimeException e) {
+                         try {
+                             list = service.getProjectsForCurrentPpmUser(values);
+                         } catch (RestRequestException e) {
+                             logger.error("VersionOne TimeSheet", e);
+                             new VersionOneConnectivityExceptionHandler().uncaughtException(Thread.currentThread(), e,
+                                     VersionOneTimeSheetIntegration.class);
+                         } catch (RuntimeException e) {
                             logger.error("VersionOne TimeSheet", e);
                             new VersionOneConnectivityExceptionHandler().uncaughtException(Thread.currentThread(), e,
                                     VersionOneTimeSheetIntegration.class);
