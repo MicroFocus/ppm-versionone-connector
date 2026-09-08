@@ -15,8 +15,9 @@ import com.ppm.integration.agilesdk.connector.versionone.model.*;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.IRestConfig;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.VersionOneRestConfig;
 import com.ppm.integration.agilesdk.provider.Providers;
-import org.apache.log4j.Logger;
-import org.apache.wink.client.ClientResponse;
+import com.kintana.core.logging.LogManager;
+import com.kintana.core.logging.Logger;
+import com.ppm.integration.agilesdk.connector.versionone.rest.util.ClientResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +27,7 @@ import com.ppm.integration.agilesdk.connector.versionone.rest.util.RestWrapper;
 import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants.*;
 
 public class VersionOneService {
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(VersionOneService.class);
 
     private String baseUri;
 
@@ -478,8 +479,6 @@ public class VersionOneService {
         String getString =  values.get(KEY_AGILITY_REST_URL);
         if (StringUtils.isNullOrEmptyOrBlank(getString)) {getString =  DEFAULT_AGILITY_REST_URL;}
         getString = getString.replace("%WBS_ID%", wbsID);
-
-        getString = encodeUrl(getString);
 
         getString = baseUri + getString;
 
