@@ -3,7 +3,7 @@ package com.ppm.integration.agilesdk.connector.versionone.rest.util.exception;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
-import org.apache.wink.client.ClientRuntimeException;
+import org.springframework.web.client.RestClientException;
 
 import com.ppm.integration.IntegrationException;
 import com.ppm.integration.agilesdk.connector.versionone.VersionOneIntegrationConnector;
@@ -16,8 +16,8 @@ public class VersionOneConnectivityExceptionHandler implements UncaughtException
     }
 
     public void uncaughtException(Thread t, Throwable e, Class cls) {
-        if (e instanceof ClientRuntimeException) {
-            handleClientRuntimeException((ClientRuntimeException)e, cls);
+        if (e instanceof RestClientException) {
+            handleRestClientException((RestClientException)e, cls);
         } else if (e instanceof RestRequestException) {
             handleClientException((RestRequestException)e, cls);
         } else if (e instanceof IntegrationException) {
@@ -49,7 +49,7 @@ public class VersionOneConnectivityExceptionHandler implements UncaughtException
 
     }
 
-    private void handleClientRuntimeException(ClientRuntimeException e, Class cls) {
+    private void handleRestClientException(RestClientException e, Class cls) {
         java.net.UnknownHostException unknownHost = extractException(e, java.net.UnknownHostException.class);
         if (unknownHost != null) {
             throw IntegrationException.build(cls).setErrorCode("ERROR_UNEXPECTED")
@@ -67,7 +67,7 @@ public class VersionOneConnectivityExceptionHandler implements UncaughtException
     }
 
     @SuppressWarnings("unchecked")
-    protected <T extends Throwable> T extractException(ClientRuntimeException e, Class<T> clazz) {
+    protected <T extends Throwable> T extractException(RestClientException e, Class<T> clazz) {
 
         Throwable t = e;
         while (!clazz.isInstance(t) && t != null) {
@@ -77,3 +77,4 @@ public class VersionOneConnectivityExceptionHandler implements UncaughtException
         return (T)t;
     }
 }
+
