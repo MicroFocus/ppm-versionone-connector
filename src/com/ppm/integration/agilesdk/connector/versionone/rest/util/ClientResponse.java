@@ -18,7 +18,7 @@ public class ClientResponse {
      * Returns HTTP status code (mimics Wink ClientResponse.getStatusCode()).
      */
     public int getStatusCode() {
-        return responseEntity.getStatusCodeValue();
+        return responseEntity.getStatusCode().value();
     }
 
     /**
