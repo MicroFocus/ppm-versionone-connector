@@ -72,7 +72,7 @@ public class RestWrapper {
         HttpEntity<?> requestEntity = getRequestHeaders(uri);
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
         
-        int statusCode = response.getStatusCodeValue();
+        int statusCode = response.getStatusCode().value();
         if (statusCode != 200) {
             String reasonPhrase = getReasonPhrase(response.getStatusCode());
             if (logger.isDebugEnabled()) {
