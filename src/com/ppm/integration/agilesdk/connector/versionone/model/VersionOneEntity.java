@@ -6,13 +6,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.kintana.core.logging.LogManager;
+import com.kintana.core.logging.Logger;
 import com.ppm.integration.agilesdk.connector.versionone.VersionOneConstants;
-import org.apache.log4j.Logger;
 
 import com.ppm.integration.agilesdk.pm.ExternalTask;
 
 public class VersionOneEntity extends ExternalTask implements VersionOneConstants {
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(VersionOneEntity.class);
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 

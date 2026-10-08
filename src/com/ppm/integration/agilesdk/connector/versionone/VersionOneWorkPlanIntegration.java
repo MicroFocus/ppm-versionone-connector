@@ -10,8 +10,8 @@ import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneRequest
 import com.ppm.integration.agilesdk.provider.Providers;
 import com.ppm.integration.agilesdk.provider.UserProvider;
 import com.ppm.integration.agilesdk.ui.*;
-import org.apache.log4j.Logger;
-import org.apache.wink.client.ClientRuntimeException;
+import com.kintana.core.logging.LogManager;
+import com.kintana.core.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ppm.integration.agilesdk.ValueSet;
@@ -29,7 +29,7 @@ import com.ppm.integration.agilesdk.pm.WorkPlanIntegrationContext;
 
 public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(VersionOneWorkPlanIntegration.class);
 
     private VersionOneService service;
 
@@ -67,7 +67,7 @@ public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
                                 List<VersionOneScope> list = new ArrayList<>();
                                 try {
                                     list = service.getProjectsForCurrentPpmUser(values);
-                                } catch (ClientRuntimeException | RestRequestException e) {
+                                } catch (RestRequestException e) {
                                     logger.error("VersionOne Workplan", e);
                                     new VersionOneConnectivityExceptionHandler().uncaughtException(
                                             Thread.currentThread(), e, VersionOneWorkPlanIntegration.class);
