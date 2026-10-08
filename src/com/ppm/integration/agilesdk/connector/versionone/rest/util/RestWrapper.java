@@ -84,6 +84,23 @@ public class RestWrapper {
         if (logger.isDebugEnabled()) {
             logger.debug("<=== HTTP 200");
         }
-        return new ClientResponse(response);
+        return new ClientResponse(jsonIncludeNonNull(response));
+    }
+
+    private ResponseEntity<String> jsonIncludeNonNull(ResponseEntity<String> response) {
+        try {
+            if (response.getBody() != null && !response.getBody().trim().isEmpty()) {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                mapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
+
+                Object parsedBody = mapper.readValue(response.getBody(), Object.class);
+                response = ResponseEntity.status(response.getStatusCode())
+                        .headers(response.getHeaders())
+                        .body(mapper.writeValueAsString(parsedBody));
+            }
+        } catch (Exception e) {
+            logger.debug("Error on Parsing data to remove null values from response body: " + e.getMessage(), e);
+        }
+        return response;
     }
 }
