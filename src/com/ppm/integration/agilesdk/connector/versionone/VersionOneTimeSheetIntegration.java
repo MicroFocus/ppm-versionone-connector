@@ -12,8 +12,8 @@ import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.apache.log4j.Logger;
-import org.apache.wink.client.ClientRuntimeException;
+import com.kintana.core.logging.LogManager;
+import com.kintana.core.logging.Logger;
 
 import com.ppm.integration.agilesdk.ValueSet;
 import com.ppm.integration.agilesdk.connector.versionone.model.VersionOneScope;
@@ -33,7 +33,7 @@ import com.ppm.integration.agilesdk.ui.PasswordText;
 
 public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(VersionOneTimeSheetIntegration.class);
 
     private VersionOneService service;
 
@@ -88,13 +88,13 @@ public class VersionOneTimeSheetIntegration extends TimeSheetIntegration {
                         configureService(values);
 
                         List<VersionOneScope> list = new ArrayList<>();
-                        try {
-                            list = service.getProjectsForCurrentPpmUser(values);
-                        } catch (ClientRuntimeException | RestRequestException e) {
-                            logger.error("VersionOne TimeSheet", e);
-                            new VersionOneConnectivityExceptionHandler().uncaughtException(Thread.currentThread(), e,
-                                    VersionOneTimeSheetIntegration.class);
-                        } catch (RuntimeException e) {
+                         try {
+                             list = service.getProjectsForCurrentPpmUser(values);
+                         } catch (RestRequestException e) {
+                             logger.error("VersionOne TimeSheet", e);
+                             new VersionOneConnectivityExceptionHandler().uncaughtException(Thread.currentThread(), e,
+                                     VersionOneTimeSheetIntegration.class);
+                         } catch (RuntimeException e) {
                             logger.error("VersionOne TimeSheet", e);
                             new VersionOneConnectivityExceptionHandler().uncaughtException(Thread.currentThread(), e,
                                     VersionOneTimeSheetIntegration.class);

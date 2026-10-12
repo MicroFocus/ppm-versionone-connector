@@ -12,8 +12,9 @@ import com.ppm.integration.agilesdk.connector.versionone.model.*;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.IRestConfig;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.VersionOneRestConfig;
 import com.ppm.integration.agilesdk.provider.Providers;
-import org.apache.log4j.Logger;
-import org.apache.wink.client.ClientResponse;
+import com.kintana.core.logging.LogManager;
+import com.kintana.core.logging.Logger;
+import com.ppm.integration.agilesdk.connector.versionone.rest.util.ClientResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +22,7 @@ import org.json.JSONObject;
 import com.ppm.integration.agilesdk.connector.versionone.rest.util.RestWrapper;
 
 public class VersionOneService {
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(VersionOneService.class);
 
     private String baseUri;
 
@@ -217,7 +218,7 @@ public class VersionOneService {
             projectRequestParameter = VersionOneConstants.SPECIFIC_PROJECT_SUFFIX + scopeId;
         }
 
-        ClientResponse response = wrapper.sendGet(encodeUrl(dest + dateRequestParameter + projectRequestParameter));
+        ClientResponse response = wrapper.sendGet(dest + dateRequestParameter + projectRequestParameter);
         String jsonStr = response.getEntity(String.class);
         try {
 
@@ -239,13 +240,9 @@ public class VersionOneService {
         return list;
     }
 
-    private String encodeUrl(String url) {
-        return url.replaceAll(" ", "%20").replaceAll(">", "%3E").replaceAll("<", "%3C").replaceAll("@", "%40");
-    }
-
     private Map<VersionOneTimebox, List<VersionOneWorkItem>> getStoriesPerTimebox(VersionOneWorkPlanIntegration.TaskCreationContext context, String scopeId, boolean includeClosedSprints, boolean includeStoriesInNoSprint) {
         Map<VersionOneTimebox, List<VersionOneWorkItem>> storiesPerTimebox = new HashMap<>();
-        String getString = baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + "%22"+scopeId+"%22";
+        String getString = baseUri + VersionOneConstants.STORIES_WITH_TIMEBOX_SUFFIX + "\""+scopeId+"\"";
         if (!includeClosedSprints) {
             getString += ";Timebox.State.Code!='CLSD'";
         }
@@ -357,7 +354,7 @@ public class VersionOneService {
 
     public List<VersionOneRequest> importRequestEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String requestTypeName, String scopeId, ValueSet values) {
         List<VersionOneRequest> requests = new ArrayList<>();
-        String getString = baseUri + VersionOneConstants.REQUESTS_SUFFIX + "%22"+ requestTypeName + "%22;Scope=%22"+scopeId+"%22";
+        String getString = baseUri + VersionOneConstants.REQUESTS_SUFFIX + "\""+ requestTypeName + "\";Scope=\""+scopeId+"\"";
         ClientResponse response = wrapper.sendGet(getString);
 
         String jsonStr = response.getEntity(String.class);
@@ -395,7 +392,7 @@ public class VersionOneService {
 
     public List<VersionOneEpic> importEpicEntities(VersionOneWorkPlanIntegration.TaskCreationContext taskContext, String epicTypesName, String scopeId, ValueSet values) {
         List<VersionOneEpic> epics = new ArrayList<>();
-        String getString = baseUri + VersionOneConstants.EPICS_SUFFIX + "%22"+ epicTypesName + "%22;Scope=%22"+scopeId+"%22";
+        String getString = baseUri + VersionOneConstants.EPICS_SUFFIX + "\""+ epicTypesName + "\";Scope=\""+scopeId+"\"";
         ClientResponse response = wrapper.sendGet(getString);
 
         String jsonStr = response.getEntity(String.class);
