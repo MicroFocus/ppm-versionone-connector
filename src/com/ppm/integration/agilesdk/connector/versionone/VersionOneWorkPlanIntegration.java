@@ -14,11 +14,11 @@ import com.ppm.integration.agilesdk.pm.WorkPlanIntegration;
 import com.ppm.integration.agilesdk.pm.WorkPlanIntegrationContext;
 import com.ppm.integration.agilesdk.provider.Providers;
 import com.ppm.integration.agilesdk.provider.UserProvider;
-import com.ppm.integration.agilesdk.ui.CheckBox;
 import com.ppm.integration.agilesdk.ui.Field;
 import com.ppm.integration.agilesdk.ui.LabelText;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import com.kintana.core.logging.LogManager;
+import com.kintana.core.logging.Logger;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StandardBasicTypes;
 
@@ -29,7 +29,7 @@ import static com.ppm.integration.agilesdk.connector.versionone.VersionOneConsta
 
 public class VersionOneWorkPlanIntegration extends WorkPlanIntegration {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(VersionOneService.class);
 
     private VersionOneService service;
 
