@@ -4,6 +4,8 @@ package com.ppm.integration.agilesdk.connector.versionone.rest.util;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -90,8 +92,8 @@ public class RestWrapper {
     private ResponseEntity<String> jsonIncludeNonNull(ResponseEntity<String> response) {
         try {
             if (response.getBody() != null && !response.getBody().trim().isEmpty()) {
-                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                mapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
                 Object parsedBody = mapper.readValue(response.getBody(), Object.class);
                 response = ResponseEntity.status(response.getStatusCode())
